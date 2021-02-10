@@ -24,8 +24,9 @@ router.beforeEach((to, from, next) => {
           const roles = res.roles
           store.dispatch('GenerateRoutes', { roles }).then(accessRoutes => {
           // 测试 默认静态页面
-          // store.dispatch('permission/generateRoutes', { roles }).then(accessRoutes => {
+          //store.dispatch('permission/generateRoutes', { roles }).then(accessRoutes => {
             // 根据roles权限生成可访问的路由表
+            console.log(accessRoutes)
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
           })
@@ -38,6 +39,9 @@ router.beforeEach((to, from, next) => {
           })
       } else {
         next()
+        // 动态改变权限的需求已由后端实现
+
+
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
         // if (hasPermission(store.getters.roles, to.meta.roles)) {
         //   next()

@@ -68,8 +68,8 @@ export const constantRoutes = [
   {
     path: '/user',
     component: Layout,
-    hidden: true,
-    redirect: 'noredirect',
+    hidden: false,
+    redirect: 'noRedirect',
     children: [
       {
         path: 'profile',
@@ -105,6 +105,7 @@ export const constantRoutes = [
       }
     ]
   },
+
   {
     path: '/gen',
     component: Layout,
@@ -116,6 +117,50 @@ export const constantRoutes = [
         name: 'GenEdit',
         meta: { title: '修改生成配置' }
       }
+    ]
+  },
+  /**  ====================================================================
+   *   特别说明： 以下路由提前被定义好，但是只有后端根据权限传来对应的路由信息后才能被显示出来
+   *   显示顺序由后端决定
+   *   如果不提前定义，浏览器会出现 304
+   *   =====================================================================
+   */
+
+  {
+    path: '/system',
+    component: Layout,
+    hidden : true,
+    children : [
+      {
+        path: 'user',
+        component : (resolve) => require(['@/views/system/user/index'],resolve),
+        name: 'User',
+        meta : {title : '用户管理'}
+      },
+
+      {
+        path: 'role',
+        component : (resolve) => require(['@/views/system/role/index'],resolve),
+        name: 'Role',
+        meta : {title : '角色管理'}
+      },
+
+      {
+        path: 'menu',
+        component : (resolve) => require(['@/views/system/menu/index'],resolve),
+        name: 'Menu',
+        meta : {title : '菜单管理'}
+      },
+
+      {
+        path: 'dict',
+        component : (resolve) => require(['@/views/system/dict/index'],resolve),
+        name: 'Dict',
+        meta : {title : '数据字典'}
+      }
+
+
+
     ]
   }
 ]

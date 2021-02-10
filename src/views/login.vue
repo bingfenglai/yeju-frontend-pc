@@ -1,15 +1,15 @@
 <template>
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">椰居平台运营端</h3>
-      <el-form-item prop="username">
-        <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
+      <h3 class="title">椰居平台统一认证登录</h3>
+      <el-form-item prop="principal">
+        <el-input v-model="loginForm.principal" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="password">
+      <el-form-item prop="certificate">
         <el-input
-          v-model="loginForm.password"
+          v-model="loginForm.certificate"
           type="password"
           auto-complete="off"
           placeholder="密码"
@@ -18,9 +18,9 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="code">
+      <el-form-item prop="verificationCode">
         <el-input
-          v-model="loginForm.code"
+          v-model="loginForm.verificationCode"
           auto-complete="off"
           placeholder="验证码"
           style="width: 63%"
@@ -66,20 +66,20 @@ export default {
       codeUrl: "",
       cookiePassword: "",
       loginForm: {
-        username: "909391",
-        password: "yeju@123",
+        principal: "969391",
+        certificate: "yeju@123",
         rememberMe: false,
-        code: "",
-        uuid: ""
+        verificationCode: "123456",
+        verificationCodeKey: ""
       },
       loginRules: {
-        username: [
+        principal: [
           { required: true, trigger: "blur", message: "用户名不能为空" }
         ],
-        password: [
+        certificate: [
           { required: true, trigger: "blur", message: "密码不能为空" }
         ],
-        code: [{ required: true, trigger: "change", message: "验证码不能为空" }]
+        verificationCode: [{ required: true, trigger: "change", message: "验证码不能为空" }]
       },
       loading: false,
       redirect: undefined
@@ -100,20 +100,18 @@ export default {
   methods: {
     getCode() {
       getCodeImg().then(res => {
-        // this.codeUrl = "data:image/gif;base64," + res.img;
         this.codeUrl =  res.data.code;
-        this.loginForm.uuid = res.data.token;
-
+        this.loginForm.verificationCodeKey = res.data.token;
       });
 
     },
     getCookie() {
-      const username = Cookies.get("username");
-      const password = Cookies.get("password");
+      const principal = Cookies.get("principal");
+      const certificate = Cookies.get("certificate");
       const rememberMe = Cookies.get('rememberMe')
       this.loginForm = {
-        username: username === undefined ? this.loginForm.username : username,
-        password: password === undefined ? this.loginForm.password : decrypt(password),
+        principal: principal === undefined ? this.loginForm.principal : principal,
+        certificate: certificate === undefined ? this.loginForm.certificate : decrypt(certificate),
         rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
       };
     },
@@ -122,12 +120,12 @@ export default {
         if (valid) {
           this.loading = true;
           if (this.loginForm.rememberMe) {
-            Cookies.set("username", this.loginForm.username, { expires: 30 });
-            Cookies.set("password", encrypt(this.loginForm.password), { expires: 30 });
+            Cookies.set("principal", this.loginForm.principal, { expires: 30 });
+            Cookies.set("certificate", encrypt(this.loginForm.certificate), { expires: 30 });
             Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 });
           } else {
-            Cookies.remove("username");
-            Cookies.remove("password");
+            Cookies.remove("principal");
+            Cookies.remove("certificate");
             Cookies.remove('rememberMe');
           }
           this.$store

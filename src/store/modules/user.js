@@ -5,7 +5,7 @@ const user = {
   state: {
     token: getToken(),
     name: '',
-    avatar: '',
+    avatar: 'http://8.129.77.225:9000/yeju/8469f77f-b29d-43cb-b90c-b5acab2a4bba56eb70e8c716a.jpg',
     roles: [],
     permissions: []
   },
@@ -34,17 +34,18 @@ const user = {
   actions: {
     // 登录
     Login({ commit }, userInfo) {
-      const username = userInfo.username.trim()
-      const password = userInfo.password
-      const code = userInfo.code
-      const uuid = userInfo.uuid
+      const principal = userInfo.principal
+      const certificate = userInfo.certificate
+      const verificationCode = userInfo.verificationCode
+      const verificationCodeKey = userInfo.verificationCodeKey
       return new Promise((resolve, reject) => {
-        login(username, password, code, uuid).then(res => {
-          let data = res.data
-          setToken(data.access_token)
-          commit('SET_TOKEN', data.access_token)
-          setExpiresIn(data.expires_in)
-          commit('SET_EXPIRES_IN', data.expires_in)
+        login(principal, certificate, verificationCode, verificationCodeKey).then(res => {
+
+          let data = res.data;
+          setToken(data.accessToken)
+          commit('SET_TOKEN', data.accessToken)
+          setExpiresIn(data.expiresAt)
+          commit('SET_EXPIRES_IN', data.expiresAt)
           resolve()
         }).catch(error => {
           reject(error)
@@ -55,17 +56,20 @@ const user = {
     // 获取用户信息
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
+
         getInfo(state.token).then(res => {
-          const user = res.user
-          const avatar = user.avatar == "" ? require("@/assets/image/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
-          if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', res.roles)
-            commit('SET_PERMISSIONS', res.permissions)
+          console.log(res)
+          //const user = res.user
+          const data = res.data
+          //const avatar = user.avatar === "" ? require("@/assets/image/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
+          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+            commit('SET_ROLES', data.roles)
+            commit('SET_PERMISSIONS', data.resources)
           } else {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
-          commit('SET_NAME', user.userName)
-          commit('SET_AVATAR', avatar)
+          commit('SET_NAME', data.subject_details.name)
+          commit('SET_AVATAR', data.subject_details.avatar)
           resolve(res)
         }).catch(error => {
           reject(error)
@@ -85,7 +89,7 @@ const user = {
         })
       })
     },
-    
+
     // 退出系统
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
