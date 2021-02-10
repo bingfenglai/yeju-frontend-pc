@@ -1,7 +1,9 @@
 <template>
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">椰居平台统一认证登录</h3>
+      <h3 class="title">
+        椰居运营端
+      </h3>
       <el-form-item prop="principal">
         <el-input v-model="loginForm.principal" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
@@ -57,6 +59,7 @@
 import { getCodeImg } from "@/api/login";
 import Cookies from "js-cookie";
 import { encrypt, decrypt } from '@/utils/jsencrypt'
+
 import Axios from 'axios'
 
 export default {
@@ -150,7 +153,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
-  background-image: url("../assets/image/login-background.jpg");
+  background-image: url("../assets/image/bk_new.jpg");
   background-size: cover;
 }
 .title {

@@ -48,17 +48,13 @@ service.interceptors.response.use(res => {
           location.reload() // 为了重新实例化vue-router对象 避免bug
         })
       })
-    } else if (code === "500") {
-      Message({
-        message: msg,
-        type: 'error'
-      })
-      return Promise.reject(new Error(msg))
     } else if (code !== "00000") {
       Notification.error({
-        title: msg
+        //title: msg
+        title: errorCode.default,
+        message : msg
       })
-      return Promise.reject('error')
+      //return Promise.reject('error')
     } else {
       return res.data
     }
