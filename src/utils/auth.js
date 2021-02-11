@@ -1,4 +1,7 @@
 import Cookies from 'js-cookie'
+import { refreshToken } from '@/api/login'
+
+import myStore from '@/store/token'
 
 const TokenKey = 'Authorization'
 
@@ -26,4 +29,21 @@ export function setExpiresIn(time) {
 
 export function removeExpiresIn() {
   return Cookies.remove(ExpiresInKey)
+}
+
+
+
+export function refreshTokenMethod(){
+
+  if (getToken()!==null && getToken()!==undefined &&myStore.countRefreshToken <3){
+    refreshToken().then(res=>{
+      let data = res.data;
+      console.log(data.access_token)
+      setToken(data.access_token);
+      console.log("计数: ",myStore.countRefreshToken)
+      myStore.countRefreshToken =1 + myStore.countRefreshToken
+    })
+  }
+
+
 }

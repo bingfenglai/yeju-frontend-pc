@@ -81,8 +81,10 @@ const user = {
     RefreshToken({commit, state}) {
       return new Promise((resolve, reject) => {
         refreshToken(state.token).then(res => {
-          setExpiresIn(res.data)
-          commit('SET_EXPIRES_IN', res.data)
+          setExpiresIn(res.data.expires_in)
+          setToken(res.data.access_token)
+          commit('SET_EXPIRES_IN', res.data.expires_at)
+          commit('SET_TOKEN',res.data.access_token)
           resolve()
         }).catch(error => {
           reject(error)

@@ -180,18 +180,32 @@ export const constantRoutes = [
   },
 
   {
+    path: '/product',
+    component: Layout,
+    hidden : true,
+    children : [
+      {
+
+        path: '/house',
+        component : (resolve) => require(['@/views/product/house/index']),
+        name: 'house',
+        hidden : false,
+        meta : {title : 'API文档'}
+      }
+
+
+    ]
+  },
+
+  {
     path: '/tool',
     component: Layout,
     hidden : true,
     children: [
-      {
-        path: '/logininfo',
-        component : (resolve) => require(['@/views/system/user/index'],resolve),
-        name: 'logininfo',
-        meta : {title : '登录日志'}
-      }
+
       ]
   }
+
 ]
 
 export default new Router({

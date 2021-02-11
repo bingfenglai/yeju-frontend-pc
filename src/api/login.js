@@ -32,8 +32,8 @@ export function login(principal, certificate, verificationCode, verificationCode
 // 刷新方法
 export function refreshToken() {
   return request({
-    url: '/auth/refresh',
-    method: 'post'
+    url: '/auth-consumer/authz/refreshToken',
+    method: 'get'
   })
 }
 
@@ -48,7 +48,7 @@ export function getInfo() {
 // 退出方法
 export function logout() {
   return request({
-    url: '/auth/logout',
+    url: '/auth-consumer/auth/logout',
     method: 'delete'
   })
 }

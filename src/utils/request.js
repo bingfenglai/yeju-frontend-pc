@@ -22,6 +22,7 @@ service.interceptors.request.use(config => {
   if (getToken() && !isToken) {
     config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际
   }
+
   return config
 }, error => {
     console.log(error)
@@ -34,7 +35,7 @@ service.interceptors.response.use(res => {
     const code = res.data.code || "00000";
     // 获取错误信息
     const msg = errorCode[code] || res.data.message || errorCode['default']
-    if (code === "A0001") {
+    if (code === "A0001"||code ==="A0011") {
       MessageBox.confirm(
         '登录状态已过期，您可以继续留在该页面，或者重新登录',
         '系统提示',
@@ -48,7 +49,7 @@ service.interceptors.response.use(res => {
           location.reload() // 为了重新实例化vue-router对象 避免bug
         })
       })
-    } else if (code !== "00000") {
+    } else if (code !== "00000" && code!=="A0001") {
       Notification.error({
         //title: msg
         title: errorCode.default,

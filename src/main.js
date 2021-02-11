@@ -1,5 +1,4 @@
 import Vue from 'vue'
-
 import Cookies from 'js-cookie'
 
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
@@ -17,6 +16,7 @@ import { download } from '@/utils/request'
 
 import './assets/icons' // icon
 import './permission' // permission control
+import refreshTokenMethod from "@/utils/auth";
 import { getDicts } from "@/api/system/dict/data";
 import { getConfigKey } from "@/api/system/config";
 import { parseTime, resetForm, addDateRange, selectDictLabel, selectDictLabels, handleTree } from "@/utils/ruoyi";
