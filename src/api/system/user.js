@@ -2,11 +2,10 @@ import request from '@/utils/request'
 import { praseStrEmpty } from "@/utils/ruoyi";
 
 // 查询用户列表
-export function listUser(query) {
+export function listUser(currentPage,size) {
   return request({
-    url: '/system/user/list',
+    url: 'yeju-all-rest-api/platform/employee/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 

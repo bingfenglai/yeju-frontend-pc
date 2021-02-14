@@ -135,15 +135,16 @@
 
         <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="用户编号" align="center" prop="userId" />
-          <el-table-column label="用户名称" align="center" prop="userName" :show-overflow-tooltip="true" />
-          <el-table-column label="用户昵称" align="center" prop="nickName" :show-overflow-tooltip="true" />
+          <el-table-column label="员工工号" align="center" prop="employees_number" />
+          <el-table-column label="员工名称" align="center" prop="name" :show-overflow-tooltip="true" />
+          <el-table-column label="性别" align="center" prop="gender" :show-overflow-tooltip="true" />
           <el-table-column label="部门" align="center" prop="dept.deptName" :show-overflow-tooltip="true" />
-          <el-table-column label="手机号码" align="center" prop="phonenumber" width="120" />
+          <el-table-column label="手机号码" align="center" prop="phone_number" width="120" />
+          <el-table-column label="邮箱" align="center" prop="email" :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center">
             <template slot-scope="scope">
               <el-switch
-                v-model="scope.row.status"
+                v-model="scope.row.employees_status"
                 active-value="0"
                 inactive-value="1"
                 @change="handleStatusChange(scope.row)"
@@ -469,8 +470,9 @@ export default {
     /** 查询用户列表 */
     getList() {
       this.loading = true;
-      listUser(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-          this.userList = response.rows;
+      listUser(this.queryParams.pageNum,this.queryParams.pageSize).then(response => {
+
+          this.userList = response.list;
           this.total = response.total;
           this.loading = false;
         }

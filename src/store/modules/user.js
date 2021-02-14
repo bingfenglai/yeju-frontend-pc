@@ -27,6 +27,7 @@ const user = {
       state.roles = roles
     },
     SET_PERMISSIONS: (state, permissions) => {
+
       state.permissions = permissions
     }
   },
@@ -62,10 +63,13 @@ const user = {
           //const user = res.user
           const data = res.data
           //const avatar = user.avatar === "" ? require("@/assets/image/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
+          console.log(data.account_details_info.roles)
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+
             commit('SET_ROLES', data.roles)
             commit('SET_PERMISSIONS', data.resources)
           } else {
+
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
           commit('SET_NAME', data.subject_details.name)
