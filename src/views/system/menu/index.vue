@@ -42,36 +42,32 @@
     <el-table
       v-loading="loading"
       :data="menuList"
-      row-key="menuId"
+      row-key="menu_id"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="menuName" label="菜单名称" :show-overflow-tooltip="true" width="160"></el-table-column>
+      <el-table-column prop="menu_name" label="菜单名称" :show-overflow-tooltip="true" width="160"></el-table-column>
       <el-table-column prop="icon" label="图标" align="center" width="100">
         <template slot-scope="scope">
           <svg-icon :icon-class="scope.row.icon" />
         </template>
       </el-table-column>
-      <el-table-column prop="orderNum" label="排序" width="60"></el-table-column>
-      <el-table-column prop="perms" label="权限标识" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="order_number" label="排序" width="60"></el-table-column>
+      <el-table-column prop="resource_code" label="权限标识" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="component" label="组件路径" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="status" label="状态" :formatter="statusFormat" width="80"></el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column prop="resource_status" label="状态" :formatter="statusFormat" width="80"></el-table-column>
+      <el-table-column label="创建时间" align="center" prop="create_time"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" 
-            type="text" 
-            icon="el-icon-edit" 
+          <el-button size="mini"
+            type="text"
+            icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['system:menu:edit']"
           >修改</el-button>
-          <el-button 
-            size="mini" 
-            type="text" 
-            icon="el-icon-plus" 
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-plus"
             @click="handleAdd(scope.row)"
             v-hasPermi="['system:menu:add']"
           >新增</el-button>
@@ -206,7 +202,7 @@
 </template>
 
 <script>
-import { listMenu, getMenu, delMenu, addMenu, updateMenu } from "@/api/system/menu";
+import { listMenu, getMenu, delMenu, addMenu, updateMenu,allMenu } from "@/api/system/menu";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import IconSelect from "@/components/IconSelect";
@@ -234,6 +230,8 @@ export default {
       statusOptions: [],
       // 查询参数
       queryParams: {
+        currentPage: 1,
+        size: 10,
         menuName: undefined,
         visible: undefined
       },
@@ -255,12 +253,12 @@ export default {
   },
   created() {
     this.getList();
-    this.getDicts("sys_show_hide").then(response => {
-      this.visibleOptions = response.data;
-    });
-    this.getDicts("sys_normal_disable").then(response => {
-      this.statusOptions = response.data;
-    });
+    // this.getDicts("sys_show_hide").then(response => {
+    //   this.visibleOptions = response.data;
+    // });
+    // this.getDicts("sys_normal_disable").then(response => {
+    //   this.statusOptions = response.data;
+    // });
   },
   methods: {
     // 选择图标
@@ -270,10 +268,14 @@ export default {
     /** 查询菜单列表 */
     getList() {
       this.loading = true;
-      listMenu(this.queryParams).then(response => {
-        this.menuList = this.handleTree(response.data, "menuId");
+      // listMenu(this.queryParams.currentPage,this.queryParams.size).then(response => {
+      //   this.menuList = this.handleTree(response.list, "menu_id");
+      //   this.loading = false;
+      // });
+      allMenu().then(resp=>{
+        this.menuList = this.handleTree(resp.data,"menu_id");
         this.loading = false;
-      });
+      })
     },
     /** 转换菜单数据结构 */
     normalizer(node) {
@@ -281,8 +283,8 @@ export default {
         delete node.children;
       }
       return {
-        id: node.menuId,
-        label: node.menuName,
+        id: node.menu_id,
+        label: node.menu_name,
         children: node.children
       };
     },
@@ -291,7 +293,7 @@ export default {
       listMenu().then(response => {
         this.menuOptions = [];
         const menu = { menuId: 0, menuName: '主类目', children: [] };
-        menu.children = this.handleTree(response.data, "menuId");
+        menu.children = this.handleTree(response.list, "menu_id");
         this.menuOptions.push(menu);
       });
     },

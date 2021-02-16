@@ -1,11 +1,17 @@
 import request from '@/utils/request'
 
 // 查询菜单列表
-export function listMenu(query) {
+export function listMenu(currentPage,size) {
   return request({
-    url: '/system/menu/list',
+    url:  'yeju-all-rest-api/platform/menu/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
+  })
+}
+
+export function allMenu() {
+  return request({
+    url:  'yeju-all-rest-api/platform/menu/findAll',
+    method: 'get',
   })
 }
 

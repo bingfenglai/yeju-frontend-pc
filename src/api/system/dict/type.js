@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询字典类型列表
-export function listType(query) {
+export function listType(currentPage,size) {
   return request({
-    url: '/system/dict/type/list',
+    url: 'yeju-all-rest-api/platform/dataDictionary/type/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 

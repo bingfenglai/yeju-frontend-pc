@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询部门列表
-export function listDept(query) {
+export function listDept(currentPage,size) {
   return request({
-    url: '/system/dept/list',
+    url: 'yeju-all-rest-api/platform/department/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 
@@ -28,7 +27,7 @@ export function getDept(deptId) {
 // 查询部门下拉树结构
 export function treeselect() {
   return request({
-    url: '/system/dept/treeselect',
+    url: 'yeju-all-rest-api/platform/department//getDepartmentTree',
     method: 'get'
   })
 }

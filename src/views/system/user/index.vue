@@ -138,24 +138,20 @@
           <el-table-column label="员工工号" align="center" prop="employees_number" />
           <el-table-column label="员工名称" align="center" prop="name" :show-overflow-tooltip="true" />
           <el-table-column label="性别" align="center" prop="gender" :show-overflow-tooltip="true" />
-          <el-table-column label="部门" align="center" prop="dept.deptName" :show-overflow-tooltip="true" />
+          <el-table-column label="部门" align="center" prop="department.name" :show-overflow-tooltip="true" />
           <el-table-column label="手机号码" align="center" prop="phone_number" width="120" />
           <el-table-column label="邮箱" align="center" prop="email" :show-overflow-tooltip="true" />
           <el-table-column label="状态" align="center">
             <template slot-scope="scope">
               <el-switch
-                v-model="scope.row.employees_status"
-                active-value="0"
-                inactive-value="1"
+                v-model="scope.row.employees_status.toString()"
+                active-value="1"
+                inactive-value="0"
                 @change="handleStatusChange(scope.row)"
               ></el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime" width="160">
-            <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.createTime) }}</span>
-            </template>
-          </el-table-column>
+          <el-table-column label="创建时间" align="center" prop="create_time" width="160"></el-table-column>
           <el-table-column
             label="操作"
             align="center"
@@ -456,12 +452,12 @@ export default {
   created() {
     this.getList();
     this.getTreeselect();
-    this.getDicts("sys_normal_disable").then(response => {
-      this.statusOptions = response.data;
-    });
-    this.getDicts("sys_user_sex").then(response => {
-      this.sexOptions = response.data;
-    });
+    // this.getDicts("sys_normal_disable").then(response => {
+    //   this.statusOptions = response.data;
+    // });
+    // this.getDicts("sys_user_sex").then(response => {
+    //   this.sexOptions = response.data;
+    // });
     this.getConfigKey("sys.user.initPassword").then(response => {
       this.initPassword = response.msg;
     });
@@ -481,13 +477,14 @@ export default {
     /** 查询部门下拉树结构 */
     getTreeselect() {
       treeselect().then(response => {
+        console.log(response.data)
         this.deptOptions = response.data;
       });
     },
     // 筛选节点
     filterNode(value, data) {
       if (!value) return true;
-      return data.label.indexOf(value) !== -1;
+      return data.name.indexOf(value) !== -1;
     },
     // 节点单击事件
     handleNodeClick(data) {
@@ -496,17 +493,18 @@ export default {
     },
     // 用户状态修改
     handleStatusChange(row) {
-      let text = row.status === "0" ? "启用" : "停用";
-      this.$confirm('确认要"' + text + '""' + row.userName + '"用户吗?', "警告", {
+      console.log("状态：：：：：",row.employees_status)
+      let text = row.employees_status === 1 ? "启用" : "停用";
+      this.$confirm('确认要"' + text + '""' + row.name + '"用户吗?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
         }).then(function() {
-          return changeUserStatus(row.userId, row.status);
+          return changeUserStatus(row.employees_number, row.employees_status);
         }).then(() => {
           this.msgSuccess(text + "成功");
         }).catch(function() {
-          row.status = row.status === "0" ? "1" : "0";
+          row.employees_status = row.employees_status === 1 ? "1" : "0";
         });
     },
     // 取消按钮
@@ -525,7 +523,7 @@ export default {
         phonenumber: undefined,
         email: undefined,
         sex: undefined,
-        status: "0",
+        employees_status: "1",
         remark: undefined,
         postIds: [],
         roleIds: []
