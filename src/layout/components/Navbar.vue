@@ -55,6 +55,8 @@ import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
 
+
+
 export default {
   components: {
     Breadcrumb,
@@ -83,6 +85,7 @@ export default {
       }
     }
   },
+
   methods: {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')

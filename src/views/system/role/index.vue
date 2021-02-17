@@ -343,7 +343,7 @@ export default {
       listRole(this.queryParams.pageNum,this.queryParams.pageSize).then(
         response => {
           this.roleList = response.list;
-          this.total = response.count;
+          this.total = response.total;
           this.loading = false;
         }
       );

@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询登录日志列表
-export function list(query) {
+export function list(currentPage,size) {
   return request({
-    url: '/system/logininfor/list',
+    url: '/yeju-all-rest-api/log/login/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 

@@ -89,16 +89,12 @@
 
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="访问编号" align="center" prop="infoId" />
-      <el-table-column label="用户名称" align="center" prop="userName" />
-      <el-table-column label="地址" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
-      <el-table-column label="状态" align="center" prop="status" :formatter="statusFormat" />
-      <el-table-column label="描述" align="center" prop="msg" />
-      <el-table-column label="访问时间" align="center" prop="accessTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.accessTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="访问编号" align="center" prop="loginLogId" />
+      <el-table-column label="账号" align="center" prop="account" />
+      <el-table-column label="地址" align="center" prop="ip" width="130" :show-overflow-tooltip="true" />
+      <el-table-column label="状态" align="center" prop="loginStatus" :formatter="statusFormat" />
+      <el-table-column label="描述" align="center" prop="message" />
+      <el-table-column label="访问时间" align="center" prop="accentTime" width="180"/>
     </el-table>
 
     <pagination
@@ -146,16 +142,16 @@ export default {
   },
   created() {
     this.getList();
-    this.getDicts("sys_common_status").then(response => {
-      this.statusOptions = response.data;
-    });
+    // this.getDicts("sys_common_status").then(response => {
+    //   this.statusOptions = response.data;
+    // });
   },
   methods: {
     /** 查询登录日志列表 */
     getList() {
       this.loading = true;
-      list(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-          this.list = response.rows;
+      list(this.queryParams.pageNum,this.queryParams.pageSize).then(response => {
+          this.list = response.list;
           this.total = response.total;
           this.loading = false;
         }

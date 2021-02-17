@@ -1,6 +1,6 @@
 import { login, logout, getInfo, refreshToken } from '@/api/login'
 import { getToken, setToken, setExpiresIn, removeToken } from '@/utils/auth'
-
+import {realTimeNotice} from '@/api/system/notice'
 const user = {
   state: {
     token: getToken(),
@@ -47,6 +47,8 @@ const user = {
           commit('SET_TOKEN', data.accessToken)
           setExpiresIn(data.expiresAt)
           commit('SET_EXPIRES_IN', data.expiresAt)
+
+
           resolve()
         }).catch(error => {
           reject(error)
@@ -56,6 +58,8 @@ const user = {
 
     // 获取用户信息
     GetInfo({ commit, state }) {
+      //读取系统通知
+      realTimeNotice();
       return new Promise((resolve, reject) => {
 
         getInfo(state.token).then(res => {
@@ -63,7 +67,7 @@ const user = {
           //const user = res.user
           const data = res.data
           //const avatar = user.avatar === "" ? require("@/assets/image/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
-          console.log(data.account_details_info.roles)
+
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
 
             commit('SET_ROLES', data.roles)

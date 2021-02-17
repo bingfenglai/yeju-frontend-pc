@@ -40,6 +40,13 @@ module.exports = {
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }
+      },
+      [process.env.WebSocket]: {
+        target: `ws://192.168.0.148:81`,
+        changeOrigin : true,
+        pathRewrite : {
+            ['^'+process.env.WebSocket]: ''
+        }
       }
     },
     disableHostCheck: true
