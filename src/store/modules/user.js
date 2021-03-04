@@ -48,7 +48,8 @@ const user = {
           setExpiresIn(data.expiresAt)
           commit('SET_EXPIRES_IN', data.expiresAt)
 
-
+          //读取系统通知
+          realTimeNotice(data.accessToken);
           resolve()
         }).catch(error => {
           reject(error)
@@ -58,8 +59,7 @@ const user = {
 
     // 获取用户信息
     GetInfo({ commit, state }) {
-      //读取系统通知
-      realTimeNotice();
+
       return new Promise((resolve, reject) => {
 
         getInfo(state.token).then(res => {
@@ -71,18 +71,22 @@ const user = {
           if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
 
             commit('SET_ROLES', data.roles)
-            commit('SET_PERMISSIONS', data.resources)
+            commit('SET_PERMISSIONS', data.permissions)
           } else {
 
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
-          commit('SET_NAME', data.subject_details.name)
-          commit('SET_AVATAR', data.subject_details.avatar)
+          commit('SET_NAME', data.name)
+          commit('SET_AVATAR', data.avatar)
+
           resolve(res)
+
         }).catch(error => {
           reject(error)
         })
+
       })
+
     },
 
     // 刷新token

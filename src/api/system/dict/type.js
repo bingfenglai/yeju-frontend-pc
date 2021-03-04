@@ -8,6 +8,22 @@ export function listType(currentPage,size) {
   })
 }
 
+//通用状态查询
+export function listUniversalLabelAndValue(type) {
+  return request({
+    url: 'yeju-all-rest-api/platform/dataDictionary/type/'+type+'/list',
+    method: 'get',
+  })
+}
+
+export function listDictStatus() {
+  return request({
+    url: 'yeju-all-rest-api/platform/dataDictionary/type/status/list',
+    method: 'get',
+  })
+}
+
+
 // 查询字典类型详细
 export function getType(dictId) {
   return request({

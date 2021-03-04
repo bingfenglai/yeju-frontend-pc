@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询定时任务调度列表
-export function listJob(query) {
+export function listJob(currentPage,size) {
   return request({
-    url: '/schedule/job/list',
+    url: 'yeju-all-rest-api/job/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 
@@ -69,3 +68,13 @@ export function runJob(jobId, jobGroup) {
     data: data
   })
 }
+
+export function checkJobKey(jobName, jobGroup) {
+    return request({
+      url : '/yeju-all-rest-api/job/checkJobKey',
+      method: 'post'
+
+    })
+}
+
+

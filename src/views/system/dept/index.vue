@@ -14,9 +14,9 @@
         <el-select v-model="queryParams.status" placeholder="部门状态" clearable size="small">
           <el-option
             v-for="dict in statusOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -131,11 +131,81 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-drawer
+      :title="title"
+      :visible.sync="drawer"
+      :before-close="cancel">
+
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="24" v-if="form.parentId !== 0">
+            <el-form-item label="上级部门" prop="parentId">
+              <treeselect v-model="form.parentId" :options="deptOptions" :normalizer="normalizer" placeholder="选择上级部门" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="部门名称" prop="deptName">
+              <el-input v-model="form.deptName" placeholder="请输入部门名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="显示排序" prop="orderNum">
+              <el-input-number v-model="form.orderNum" controls-position="right" :min="0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="负责人" prop="leader">
+              <el-input v-model="form.leader" placeholder="请输入负责人" maxlength="20" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="联系电话" prop="phone">
+              <el-input v-model="form.phone" placeholder="请输入联系电话" maxlength="11" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="部门状态">
+              <el-radio-group v-model="form.status">
+                <el-radio
+                  v-for="dict in statusOptions"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <div slot="footer" class=" drawer__footer" style="margin-left: 50%">
+
+        <el-button @click="cancel" class="f_btn f_btn_c">取 消</el-button>
+
+
+        <el-button type="primary" @click="submitForm" class="f_btn">确 定</el-button>
+
+      </div>
+
+
+
+    </el-drawer>
   </div>
 </template>
+<style>
 
+.el-drawer__header span:focus {
+  outline: 0;
+}
+
+</style>
 <script>
-import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept";
+import { listDeptStatus,listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 
@@ -144,6 +214,7 @@ export default {
   components: { Treeselect },
   data() {
     return {
+      drawer: false,
       // 遮罩层
       loading: true,
       // 显示搜索条件
@@ -197,9 +268,7 @@ export default {
   },
   created() {
     this.getList();
-    // this.getDicts("sys_normal_disable").then(response => {
-    //   this.statusOptions = response.data;
-    // });
+    this.getDeptStatusList();
   },
   methods: {
     /** 查询部门列表 */
@@ -228,7 +297,7 @@ export default {
     },
     // 取消按钮
     cancel() {
-      this.open = false;
+      this.drawer = false;
       this.reset();
     },
     // 表单重置
@@ -257,26 +326,44 @@ export default {
     /** 新增按钮操作 */
     handleAdd(row) {
       this.reset();
-      if (row != undefined) {
+      this.drawer = true;
+      if (row !== undefined) {
         this.form.parentId = row.deptId;
       }
-      this.open = true;
       this.title = "添加部门";
       listDept().then(response => {
 	        this.deptOptions = this.handleTree(response.data, "deptId");
       });
     },
+
+    getDeptStatusList(){
+      listDeptStatus().then(response => {
+          this.statusOptions = response.data;
+      })
+    },
+
+
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      getDept(row.deptId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改部门";
-      });
-      listDeptExcludeChild(row.deptId).then(response => {
-	        this.deptOptions = this.handleTree(response.data, "deptId");
-      });
+      this.title = "修改部门";
+      this.drawer= true;
+      // getDept(row.deptId).then(response => {
+      //   this.form = response.data;
+      //   this.open = true;
+      //   this.title = "修改部门";
+      // });
+      // listDeptExcludeChild(row.deptId).then(response => {
+	    //     this.deptOptions = this.handleTree(response.data, "deptId");
+      // });
+      this.form.deptId = row.department_id
+      this.form.parentId=  row.parent_id
+      this.form.deptName =row.name
+      this.form.orderNum = row.order_number
+      //this.form.leader = row.leader_id
+      this.form.phone = row.phone_number;
+      this.form.email = row.email;
+      this.form.status = row.department_status;
     },
     /** 提交按钮 */
     submitForm: function() {

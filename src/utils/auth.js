@@ -34,12 +34,16 @@ export function removeExpiresIn() {
 
 
 export function refreshTokenMethod(){
+  if (myStore.countRefreshToken===undefined){
+    myStore.countRefreshToken = 0;
+  }
 
   if (getToken()!==null && getToken()!==undefined &&myStore.countRefreshToken <3){
     refreshToken().then(res=>{
       let data = res.data;
       setToken(data.access_token);
       console.log("计数: ",myStore.countRefreshToken)
+
       myStore.countRefreshToken =1 + myStore.countRefreshToken
     })
   }

@@ -8,6 +8,13 @@ export function listRole(currentPage,size) {
   })
 }
 
+export function listRoleStatus(){
+  return request({
+    url: 'yeju-all-rest-api/platform/role/status/list',
+    method: 'get'
+  })
+}
+
 // 查询角色详细
 export function getRole(roleId) {
   return request({

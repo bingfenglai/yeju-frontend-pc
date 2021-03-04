@@ -1,13 +1,20 @@
 import request from '@/utils/request'
 import webSocketBaseUrl from '@/store/websocket'
 
-import store from '@/store/modules/user'
 import { Notification } from 'element-ui'
 // 查询公告列表
 export function listNotice(currentPage,size) {
   return request({
-    url: '/yeju-notice/notice/list/'+currentPage+"?size="+size,
-    method: 'get',
+    url: '/yeju-all-rest-api/notice/list/'+currentPage+"?size="+size,
+    method: 'get'
+  })
+}
+
+// 查询公告类型列表
+export function listNoticeType(){
+  return request({
+    url: '/yeju-all-rest-api/notice/type/list',
+    method: 'get'
   })
 }
 
@@ -20,11 +27,11 @@ export function getNotice(noticeId) {
 }
 
 // 新增公告
-export function addNotice(data) {
+export function addNotice(args) {
   return request({
-    url: '/system/notice',
+    url: '/yeju-all-rest-api/notice/create',
     method: 'post',
-    data: data
+    data: args
   })
 }
 
@@ -46,12 +53,12 @@ export function delNotice(noticeId) {
 }
 
 // websocket 实时接收公告
-export function realTimeNotice(){
+export function realTimeNotice(token){
   console.log("进行websocket连接》。。。")
   const wsUrl = webSocketBaseUrl.state.ws+'/yeju-notice/ws/notice'
   console.log(wsUrl)
   const that = this;
-  let token = store.state.token.Authorization
+  //let token = store.state.token.Authorization
   if (typeof (WebSocket) == 'undefined') {
     Notification.warning({
       message: '当前浏览器不支持消息通知功能，建议更换chrome浏览器或者Edge浏览器',
@@ -59,16 +66,11 @@ export function realTimeNotice(){
       onClose: false
     })
   } else {
-    // 获取token保存到vuex中的用户信息，此处仅适用于本项目，注意删除或修改
-   // store.actions('GetInfo').then(info => {
-      // 实例化socket，这里我把用户名传给了后台，使后台能判断要把消息发给哪个用户，其实也可以后台直接获取用户IP来判断并推送
-      const socketUrl = 'ws://127.0.0.1:8868/websocket/';
 
-     const socket = new WebSocket(wsUrl)
+    const socket = new WebSocket(wsUrl)
       // 监听socket打开
       socket.onopen = function() {
 
-        //console.log(token)
         socket.send(token)
       };
       // 监听socket消息接收
@@ -76,10 +78,12 @@ export function realTimeNotice(){
         // 转换为json对象
 
         let data = JSON.parse(msg.data)
-        Notification.info({
+        Notification({
           title: data.title,
           message : data.message,
           duration: 0,
+          dangerouslyUseHTMLString: true,
+          type: data.type||'info',
           position: 'bottom-right',
           //showClose: false
         })

@@ -14,9 +14,9 @@
         <el-select v-model="queryParams.jobGroup" placeholder="请选择任务组名" clearable size="small">
           <el-option
             v-for="dict in jobGroupOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.task_group_id"
+            :label="dict.group_name"
+            :value="dict.task_group_id"
           />
         </el-select>
       </el-form-item>
@@ -24,9 +24,9 @@
         <el-select v-model="queryParams.status" placeholder="请选择任务状态" clearable size="small">
           <el-option
             v-for="dict in statusOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -45,16 +45,6 @@
           @click="handleAdd"
           v-hasPermi="['monitor:job:add']"
         >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['monitor:job:edit']"
-        >修改</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -89,17 +79,17 @@
 
     <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="任务编号" align="center" prop="jobId" />
-      <el-table-column label="任务名称" align="center" prop="jobName" :show-overflow-tooltip="true" />
-      <el-table-column label="任务组名" align="center" prop="jobGroup" :formatter="jobGroupFormat" />
-      <el-table-column label="调用目标字符串" align="center" prop="invokeTarget" :show-overflow-tooltip="true" />
-      <el-table-column label="cron执行表达式" align="center" prop="cronExpression" :show-overflow-tooltip="true" />
+      <el-table-column label="任务编号" align="center" prop="job_id" />
+      <el-table-column label="任务名称" align="center" prop="job_name" :show-overflow-tooltip="true" />
+      <el-table-column label="任务组名" align="center" prop="job_group"  />
+      <el-table-column label="调用目标" align="center" prop="invoke_target_str" :show-overflow-tooltip="true" />
+      <el-table-column label="cron执行表达式" align="center" prop="cron_expression" :show-overflow-tooltip="true" />
       <el-table-column label="状态" align="center">
         <template slot-scope="scope">
           <el-switch
-            v-model="scope.row.status"
-            active-value="0"
-            inactive-value="1"
+            v-model="scope.row.job_status"
+            active-value="1"
+            inactive-value="0"
             @change="handleStatusChange(scope.row)"
           ></el-switch>
         </template>
@@ -146,9 +136,9 @@
               <el-select v-model="form.jobGroup" placeholder="请选择">
                 <el-option
                   v-for="dict in jobGroupOptions"
-                  :key="dict.dictValue"
-                  :label="dict.dictLabel"
-                  :value="dict.dictValue"
+                  :key="dict.task_group_id"
+                  :label="dict.group_name"
+                  :value="dict.task_group_id"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -196,9 +186,9 @@
               <el-radio-group v-model="form.status">
                 <el-radio
                   v-for="dict in statusOptions"
-                  :key="dict.dictValue"
-                  :label="dict.dictValue"
-                >{{dict.dictLabel}}</el-radio>
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -257,16 +247,128 @@
         <el-button @click="openView = false">关 闭</el-button>
       </div>
     </el-dialog>
+
+    <!-- 添加或修改角色配置对话框 -->
+    <el-drawer
+      :title="title"
+      :visible.sync="drawer"
+      :before-close="cancel"
+
+    >
+      <div class="demo-drawer__content" >
+        <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="任务名称" prop="jobName">
+                <el-input v-model="form.jobName"  placeholder="请输入任务名称" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="任务分组" prop="jobGroup">
+                <el-select v-model="form.jobGroup" placeholder="请选择" >
+                  <el-option
+                    v-for="dict in jobGroupOptions"
+                    :key="dict.task_group_id"
+                    :label="dict.group_name"
+                    :value="dict.task_group_id"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item prop="invokeTarget">
+              <span slot="label">
+                调用目标
+                <el-tooltip placement="top">
+                  <div slot="content">
+                    Bean调用示例：pers.lbf.yeju.provider.job.task.HelloTask
+
+                  </div>
+                  <i class="el-icon-question"></i>
+                </el-tooltip>
+              </span>
+                <el-input v-model="form.invokeTarget" placeholder="请输入调用目标字符串" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="cron表达式" prop="cronExpression">
+                <el-input v-model="form.cronExpression" placeholder="请输入cron执行表达式" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="是否并发" prop="concurrent">
+                <el-radio-group v-model="form.concurrent" size="small">
+                  <el-radio-button label="0">允许</el-radio-button>
+                  <el-radio-button label="1">禁止</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="24">
+              <el-form-item label="错误策略" prop="misfirePolicy">
+                <el-radio-group v-model="form.misfirePolicy" size="small">
+                  <el-radio-button label="1">立即执行</el-radio-button>
+                  <el-radio-button label="2">执行一次</el-radio-button>
+                  <el-radio-button label="3">放弃执行</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+
+            <el-col :span="24">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in statusOptions"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+        </el-form>
+        <div slot="footer" class=" drawer__footer" style="margin-left: 50%">
+
+          <el-button @click="cancel" class="f_btn f_btn_c">取 消</el-button>
+
+
+          <el-button type="primary" @click="submitForm" class="f_btn">确 定</el-button>
+
+        </div>
+
+      </div>
+
+
+
+    </el-drawer>
   </div>
 </template>
 
+<style>
+
+.el-drawer__header span:focus {
+  outline: 0;
+}
+
+</style>
 <script>
 import { listJob, getJob, delJob, addJob, updateJob, runJob, changeJobStatus } from "@/api/monitor/job";
+import { getJobGroupNameAndId } from '@/api/monitor/jobGroup'
 
 export default {
   name: "Job",
   data() {
+    var checkJobKey  = (rule, value, callback) => {
+      if (!value){
+        return callback(new Error("任务名称不能为空"))
+      }
+      if (this.form.jobGroup!=null && this.form.jobName){
+
+      }
+    }
     return {
+      drawer: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -304,7 +406,7 @@ export default {
       // 表单校验
       rules: {
         jobName: [
-          { required: true, message: "任务名称不能为空", trigger: "blur" }
+          { validator: checkJobKey,  trigger: "blur" }
         ],
         invokeTarget: [
           { required: true, message: "调用目标字符串不能为空", trigger: "blur" }
@@ -315,24 +417,31 @@ export default {
       }
     };
   },
+
   created() {
     this.getList();
-    this.getDicts("sys_job_group").then(response => {
-      this.jobGroupOptions = response.data;
-    });
-    this.getDicts("sys_job_status").then(response => {
+    this.getJobGroupNameAndIdList();
+
+    this.getDicts("job_status").then(response => {
       this.statusOptions = response.data;
     });
+
   },
   methods: {
     /** 查询定时任务列表 */
     getList() {
       this.loading = true;
-      listJob(this.queryParams).then(response => {
-        this.jobList = response.rows;
+      listJob(this.queryParams.pageNum,this.queryParams.pageSize).then(response => {
+        this.jobList = response.list;
         this.total = response.total;
         this.loading = false;
       });
+    },
+
+    getJobGroupNameAndIdList(){
+      getJobGroupNameAndId().then(response => {
+          this.jobGroupOptions = response.data;
+      })
     },
     // 任务组名字典翻译
     jobGroupFormat(row, column) {
@@ -344,7 +453,7 @@ export default {
     },
     // 取消按钮
     cancel() {
-      this.open = false;
+      this.drawer = false;
       this.reset();
     },
     // 表单重置
@@ -418,7 +527,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.open = true;
+      this.drawer = true;
       this.title = "添加任务";
     },
     /** 修改按钮操作 */

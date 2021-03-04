@@ -1,13 +1,14 @@
 import request from '@/utils/request'
 
 // 查询字典数据列表
-export function listData(query) {
+export function listData(currentPage,size,dictTypeId) {
   return request({
-    url: '/system/dict/data/list',
+    url: 'yeju-all-rest-api/platform/dataDictionary/info/list/'+currentPage+'/'+size+'?dictTypeId='+dictTypeId,
     method: 'get',
-    params: query
   })
 }
+
+
 
 // 查询字典数据详细
 export function getData(dictCode) {
@@ -18,10 +19,10 @@ export function getData(dictCode) {
 }
 
 // 根据字典类型查询字典数据信息
-export function getDicts(dictType) {
+export function getDicts(type) {
   return request({
-    url: '/system/dict/data/type/' + dictType,
-    method: 'get'
+    url: 'yeju-all-rest-api/platform/dataDictionary/type/'+type+'/list',
+    method: 'get',
   })
 }
 

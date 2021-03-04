@@ -58,9 +58,9 @@
             >
               <el-option
                 v-for="dict in statusOptions"
-                :key="dict.dictValue"
-                :label="dict.dictLabel"
-                :value="dict.dictValue"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
               />
             </el-select>
           </el-form-item>
@@ -94,23 +94,13 @@
           </el-col>
           <el-col :span="1.5">
             <el-button
-              type="success"
-              icon="el-icon-edit"
-              size="mini"
-              :disabled="single"
-              @click="handleUpdate"
-              v-hasPermi="['system:user:edit']"
-            >修改</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button
               type="danger"
               icon="el-icon-delete"
               size="mini"
               :disabled="multiple"
               @click="handleDelete"
               v-hasPermi="['system:user:remove']"
-            >删除</el-button>
+            >批量删除</el-button>
           </el-col>
           <el-col :span="1.5">
             <el-button
@@ -239,7 +229,7 @@
             <el-form-item label="用户性别">
               <el-select v-model="form.sex" placeholder="请选择">
                 <el-option
-                  v-for="dict in sexOptions"
+                  v-for="dict in genderOptions"
                   :key="dict.dictValue"
                   :label="dict.dictLabel"
                   :value="dict.dictValue"
@@ -301,6 +291,8 @@
       </div>
     </el-dialog>
 
+
+
     <!-- 用户导入对话框 -->
     <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
       <el-upload
@@ -331,21 +323,150 @@
         <el-button @click="upload.open = false">取 消</el-button>
       </div>
     </el-dialog>
+
+
+    <!--    添加或修改抽屉-->
+    <el-drawer
+      :title="title"
+      :visible.sync="drawer"
+      :before-close="handleClose"
+
+      >
+      <div class="demo-drawer__content" >
+
+        <el-form ref="form" :label-position="labelPosition" :model="form" :rules="rules" label-width="80px">
+          <el-row >
+            <el-col :span="18" :offset="2">
+              <el-form-item v-if="form.employees_number === undefined" label="姓名" prop="username">
+                <el-input v-model="form.username" placeholder="请输入用户姓名" />
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="归属部门" prop="deptId">
+                <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" placeholder="请选择归属部门" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="手机号码" prop="phone_number">
+                <el-input v-model="form.phone_number" placeholder="请输入手机号码" maxlength="11" />
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="邮箱" prop="email">
+                <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item v-if="form.employees_number=== undefined" label="用户密码" prop="password">
+                <el-input v-model="form.password" placeholder="请输入用户密码" type="password" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="用户性别">
+                <el-select v-model="form.gender" placeholder="请选择">
+                  <el-option
+                    v-for="dict in genderOptions"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in statusOptions"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="角色">
+                <el-select v-model="form.roleIds" multiple placeholder="请选择">
+                  <el-option
+                    v-for="item in roleOptions"
+                    :key="item.roleId"
+                    :label="item.roleName"
+                    :value="item.roleId"
+                    :disabled="item.status === 1"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="备注">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <div slot="footer" class=" drawer__footer" style="margin-left: 50%">
+
+              <el-button @click="cancel" class="f_btn f_btn_c">取 消</el-button>
+
+
+              <el-button type="primary" @click="submitForm" class="f_btn">确 定</el-button>
+
+        </div>
+
+      </div>
+
+
+
+    </el-drawer>
   </div>
 </template>
 
+<style>
+
+.el-drawer__header span:focus {
+  outline: 0;
+}
+
+</style>
+
+
 <script>
-import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus } from "@/api/system/user";
+import { ListUserStatus,listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus } from "@/api/system/user";
 import { getToken } from "@/utils/auth";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+const { listUniversalLabelAndValue } = require('@/api/system/dict/type')
 
 export default {
   name: "User",
   components: { Treeselect },
   data() {
     return {
+      // 抽屉是否显示
+      drawer: false,
+      //表单对齐方式
+      labelPosition: 'right',
       // 遮罩层
       loading: true,
       // 选中数组
@@ -375,7 +496,7 @@ export default {
       // 状态数据字典
       statusOptions: [],
       // 性别状态字典
-      sexOptions: [],
+      genderOptions: [],
       // 岗位选项
       postOptions: [],
       // 角色选项
@@ -406,7 +527,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         userName: undefined,
-        phonenumber: undefined,
+        phone_number: undefined,
         status: undefined,
         deptId: undefined
       },
@@ -432,7 +553,7 @@ export default {
             trigger: ["blur", "change"]
           }
         ],
-        phonenumber: [
+        phone_number: [
           { required: true, message: "手机号码不能为空", trigger: "blur" },
           {
             pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
@@ -451,18 +572,19 @@ export default {
   },
   created() {
     this.getList();
-    this.getTreeselect();
-    // this.getDicts("sys_normal_disable").then(response => {
-    //   this.statusOptions = response.data;
+    this.getTreeSelect();
+    this.getUserStatusList();
+    // this.getConfigKey("sys.user.initPassword").then(response => {
+    //   this.initPassword = response.msg;
     // });
-    // this.getDicts("sys_user_sex").then(response => {
-    //   this.sexOptions = response.data;
-    // });
-    this.getConfigKey("sys.user.initPassword").then(response => {
-      this.initPassword = response.msg;
-    });
   },
   methods: {
+    getUserGenderOption(){
+      listUniversalLabelAndValue("gender").then(resp=>{
+        console.log(resp.data)
+        this.genderOptions = resp.data;
+      })
+    },
     /** 查询用户列表 */
     getList() {
       this.loading = true;
@@ -474,8 +596,13 @@ export default {
         }
       );
     },
+    getUserStatusList(){
+      ListUserStatus().then(response => {
+          this.statusOptions = response.data
+      })
+    },
     /** 查询部门下拉树结构 */
-    getTreeselect() {
+    getTreeSelect() {
       treeselect().then(response => {
         console.log(response.data)
         this.deptOptions = response.data;
@@ -509,6 +636,7 @@ export default {
     },
     // 取消按钮
     cancel() {
+      this.drawer = false;
       this.open = false;
       this.reset();
     },
@@ -517,12 +645,11 @@ export default {
       this.form = {
         userId: undefined,
         deptId: undefined,
-        userName: undefined,
-        nickName: undefined,
+        username: undefined,
         password: undefined,
-        phonenumber: undefined,
+        phone_number: undefined,
         email: undefined,
-        sex: undefined,
+        gender: undefined,
         employees_status: "1",
         remark: undefined,
         postIds: [],
@@ -543,37 +670,50 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.userId);
-      this.single = selection.length != 1;
+      this.ids = selection.map(item => item.employees_number);
+      this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.getTreeselect();
-      getUser().then(response => {
-        this.postOptions = response.posts;
-        this.roleOptions = response.roles;
-        this.open = true;
-        this.title = "添加用户";
-        this.form.password = this.initPassword;
-      });
+      this.drawer = true;
+      this.title = "添加用户";
+      this.getUserGenderOption();
+      this.getTreeSelect();
+      // getUser().then(response => {
+      //   this.postOptions = response.posts;
+      //   this.roleOptions = response.roles;
+      //   this.open = true;
+      //   this.title = "添加用户";
+      //   this.form.password = this.initPassword;
+      // });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      this.getTreeselect();
-      const userId = row.userId || this.ids;
-      getUser(userId).then(response => {
-        this.form = response.data;
-        this.postOptions = response.posts;
-        this.roleOptions = response.roles;
-        this.form.postIds = response.postIds;
-        this.form.roleIds = response.roleIds;
-        this.open = true;
-        this.title = "修改用户";
-        this.form.password = "";
-      });
+      this.getTreeSelect();
+      this.getUserGenderOption();
+
+      // getUser(userId).then(response => {
+      //   this.form = response.data;
+      //   this.postOptions = response.posts;
+      //   this.roleOptions = response.roles;
+      //   this.form.postIds = response.postIds;
+      //   this.form.roleIds = response.roleIds;
+      //   this.open = true;
+      //
+      //   this.form.password = "";
+      // });
+      this.drawer = true;
+      this.title = "修改用户";
+      this.form.username = row.name;
+      this.form.employees_number = row.employees_number;
+      this.form.phone_number = row.phone_number;
+      this.form.email = row.email;
+      this.form.status = row.employees_status.toString();
+
+
     },
     /** 重置密码按钮操作 */
     handleResetPwd(row) {
@@ -590,7 +730,7 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.userId != undefined) {
+          if (this.form.userId !== undefined) {
             updateUser(this.form).then(response => {
               this.msgSuccess("修改成功");
               this.open = false;
@@ -652,6 +792,18 @@ export default {
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
+    },
+
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done();
+          this.drawer = false;
+          this.reset();
+        })
+        .catch(_ => {});
+
+
     }
   }
 };

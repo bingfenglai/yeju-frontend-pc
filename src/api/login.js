@@ -40,7 +40,7 @@ export function refreshToken() {
 // 获取用户详细信息
 export function getInfo() {
   return request({
-    url: '/auth-consumer/authz/getAuthzDetailInfo',
+    url: '/auth-consumer/authz/simple/info',
     method: 'get'
   })
 }

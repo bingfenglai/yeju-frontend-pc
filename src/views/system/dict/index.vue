@@ -31,9 +31,9 @@
         >
           <el-option
             v-for="dict in statusOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -65,16 +65,7 @@
           v-hasPermi="['system:dict:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:dict:edit']"
-        >修改</el-button>
-      </el-col>
+
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -83,7 +74,7 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['system:dict:remove']"
-        >删除</el-button>
+        >批量删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -110,7 +101,13 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="字典编号" align="center" prop="id" />
       <el-table-column label="字典名称" align="center" prop="name" :show-overflow-tooltip="true" />
-      <el-table-column label="字典类型" align="center" prop="type" :show-overflow-tooltip="true"/>
+      <el-table-column label="字典类型" align="center" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          <router-link :to="'/dict/type/data/' + scope.row.id" class="link-type">
+            <span>{{ scope.row.type }}</span>
+          </router-link>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="status_str" />
       <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
       <el-table-column label="创建时间" align="center" prop="create_time" width="180"/>
@@ -169,16 +166,66 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-drawer
+      :title="title"
+      :visible.sync="drawer"
+      :before-close="cancel"
+
+    >
+      <div class="demo-drawer__content" >
+        <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+          <el-form-item label="字典名称" prop="dictName">
+            <el-input v-model="form.dictName" placeholder="请输入字典名称" />
+          </el-form-item>
+          <el-form-item label="字典类型" prop="dictType">
+            <el-input v-model="form.dictType" placeholder="请输入字典类型" />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-radio-group v-model="form.status">
+              <el-radio
+                v-for="dict in statusOptions"
+                :key="dict.value"
+                :label="dict.value"
+              >{{dict.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+          </el-form-item>
+        </el-form>
+
+        <div slot="footer" class=" drawer__footer" style="margin-left: 50%">
+
+          <el-button @click="cancel" class="f_btn f_btn_c">取 消</el-button>
+
+
+          <el-button type="primary" @click="submitForm" class="f_btn">确 定</el-button>
+
+        </div>
+
+      </div>
+
+
+
+    </el-drawer>
   </div>
 </template>
+<style>
 
+.el-drawer__header span:focus {
+  outline: 0;
+}
+
+</style>
 <script>
-import { listType, getType, delType, addType, updateType, clearCache } from "@/api/system/dict/type";
+import { listDictStatus,listType, getType, delType, addType, updateType, clearCache } from "@/api/system/dict/type";
 
 export default {
   name: "Dict",
   data() {
     return {
+      drawer: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -224,9 +271,8 @@ export default {
   },
   created() {
     this.getList();
-    // this.getDicts("sys_normal_disable").then(response => {
-    //   this.statusOptions = response.data;
-    // });
+    //查询通用状态
+    this.getListUniversalStatus();
   },
   methods: {
     /** 查询字典类型列表 */
@@ -239,13 +285,19 @@ export default {
         }
       );
     },
+
+    getListUniversalStatus(){
+      listDictStatus().then(response => {
+          this.statusOptions = response.data;
+      })
+    },
     // 字典状态字典翻译
     statusFormat(row, column) {
       return this.selectDictLabel(this.statusOptions, row.status);
     },
     // 取消按钮
     cancel() {
-      this.open = false;
+      this.drawer = false;
       this.reset();
     },
     // 表单重置
@@ -273,7 +325,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.open = true;
+      this.drawer = true;
       this.title = "添加字典类型";
     },
     // 多选框选中数据
@@ -285,18 +337,19 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const dictId = row.dictId || this.ids
-      getType(dictId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改字典类型";
-      });
+      this.drawer = true;
+      this.title = '修改字典类型';
+      this.form.dictId = row.id;
+      this.form.dictName = row.name;
+      this.form.dictType = row.type;
+      this.form.status = row.status.toString();
+      this.form.remark = row.remark;
     },
     /** 提交按钮 */
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.dictId != undefined) {
+          if (this.form.dictId !== undefined) {
             updateType(this.form).then(response => {
               this.msgSuccess("修改成功");
               this.open = false;

@@ -8,6 +8,13 @@ export function listDept(currentPage,size) {
   })
 }
 
+export function listDeptStatus(){
+  return request({
+    url:  'yeju-all-rest-api/platform/department/status/list',
+    method: 'get',
+  })
+}
+
 // 查询部门列表（排除节点）
 export function listDeptExcludeChild(deptId) {
   return request({

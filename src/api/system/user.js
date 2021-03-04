@@ -9,6 +9,20 @@ export function listUser(currentPage,size) {
   })
 }
 
+export function ListUserStatus(){
+  return request({
+    url: 'yeju-all-rest-api/platform/employee/status/list/',
+    method : 'get'
+  })
+}
+
+export function getAuthzDetailInfo(){
+  return request({
+    url: '/auth-consumer/authz/getAuthzDetailInfo',
+    method: 'get'
+  })
+}
+
 // 查询用户详细
 export function getUser(userId) {
   return request({
@@ -105,5 +119,12 @@ export function uploadAvatar(data) {
     url: '/system/user/profile/avatar',
     method: 'post',
     data: data
+  })
+}
+
+export function listGenderLabelAndValue(){
+  return request({
+    url:  'yeju-all-rest-api/platform/menu/status/list',
+    method: 'get',
   })
 }

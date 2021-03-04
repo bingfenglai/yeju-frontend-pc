@@ -27,7 +27,7 @@
     </el-form>
     <el-table
       v-loading="loading"
-      :data="list.slice((pageNum-1)*pageSize,pageNum*pageSize)"
+      :data="list"
       style="width: 100%;"
     >
       <el-table-column label="序号" type="index" align="center">
@@ -35,14 +35,13 @@
           <span>{{(pageNum - 1) * pageSize + scope.$index + 1}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="会话编号" align="center" prop="tokenId" :show-overflow-tooltip="true" />
-      <el-table-column label="登录名称" align="center" prop="userName" :show-overflow-tooltip="true" />
-      <el-table-column label="主机" align="center" prop="ipaddr" :show-overflow-tooltip="true" />
-      <el-table-column label="登录时间" align="center" prop="loginTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.loginTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="会话编号" align="center" prop="session_id" :show-overflow-tooltip="true" />
+      <el-table-column label="登录名称" align="center" prop="principal" :show-overflow-tooltip="true" />
+      <el-table-column label="IP地址" align="center" prop="ip" :show-overflow-tooltip="true" />
+      <el-table-column label="地区" align="center" prop="address" :show-overflow-tooltip="true" />
+      <el-table-column label="客户端" align="center" prop="client" :show-overflow-tooltip="true" />
+      <el-table-column label="操作系统" align="center" prop="os" :show-overflow-tooltip="true" />
+      <el-table-column label="登录时间" align="center" prop="date" width="180"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -51,12 +50,18 @@
             icon="el-icon-delete"
             @click="handleForceLogout(scope.row)"
             v-hasPermi="['monitor:online:forceLogout']"
-          >强退</el-button>
+          >踢出</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="pageNum" :limit.sync="pageSize" />
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="pageNum"
+      :limit.sync="pageSize"
+      @pagination="getList"
+    />
   </div>
 </template>
 
@@ -74,6 +79,7 @@ export default {
       // 表格数据
       list: [],
       pageNum: 1,
+      start: 0,
       pageSize: 10,
       // 查询参数
       queryParams: {
@@ -86,11 +92,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询登录日志列表 */
+    /** 查询在线用户列表 */
     getList() {
       this.loading = true;
-      list(this.queryParams).then(response => {
-        this.list = response.rows;
+      list(this.pageNum,this.pageSize).then(response => {
+        this.list = response.list;
         this.total = response.total;
         this.loading = false;
       });
@@ -107,15 +113,15 @@ export default {
     },
     /** 强退按钮操作 */
     handleForceLogout(row) {
-      this.$confirm('是否确认强退名称为"' + row.userName + '"的数据项?', "警告", {
+      this.$confirm('确认是否强退名称为"' + row.principal + '"的登录状态?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
         }).then(function() {
-          return forceLogout(row.tokenId);
+          return forceLogout(row.principal);
         }).then(() => {
           this.getList();
-          this.msgSuccess("强退成功");
+          this.msgSuccess("踢出成功");
         })
     }
   }

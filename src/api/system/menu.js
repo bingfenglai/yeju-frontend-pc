@@ -8,6 +8,13 @@ export function listMenu(currentPage,size) {
   })
 }
 
+export function listMenuStatus(){
+  return request({
+    url:  'yeju-all-rest-api/platform/menu/status/list',
+    method: 'get',
+  })
+}
+
 export function allMenu() {
   return request({
     url:  'yeju-all-rest-api/platform/menu/findAll',

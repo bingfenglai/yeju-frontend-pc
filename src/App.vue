@@ -22,6 +22,7 @@ setInterval(refreshTokenMethod,1000*60*3)
  *不再请求刷新token，使得token自动失效
  */
 function refreshTokenCounterReset(){
+
   console.log("重置",myStore.countRefreshToken)
   myStore.countRefreshToken = 0;
 }

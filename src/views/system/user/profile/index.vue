@@ -13,11 +13,11 @@
             <ul class="list-group list-group-striped">
               <li class="list-group-item">
                 <svg-icon icon-class="user" />用户名称
-                <div class="pull-right">{{ user.userName }}</div>
+                <div class="pull-right">{{ user.name }}</div>
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="phone" />手机号码
-                <div class="pull-right">{{ user.phonenumber }}</div>
+                <div class="pull-right">{{ user.phone_number }}</div>
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="email" />用户邮箱
@@ -29,11 +29,11 @@
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="peoples" />所属角色
-                <div class="pull-right">{{ roleGroup }}</div>
+                <div class="pull-right">{{ roleGroup.toString() }}</div>
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="date" />创建日期
-                <div class="pull-right">{{ user.createTime }}</div>
+                <div class="pull-right">{{ user.create_time }}</div>
               </li>
             </ul>
           </div>
@@ -42,15 +42,16 @@
       <el-col :span="18" :xs="24">
         <el-card>
           <div slot="header" class="clearfix">
-            <span>基本资料</span>
+            <span>首选项</span>
           </div>
           <el-tabs v-model="activeTab">
-            <el-tab-pane label="基本资料" name="userinfo">
-              <userInfo :user="user" />
-            </el-tab-pane>
             <el-tab-pane label="修改密码" name="resetPwd">
               <resetPwd :user="user" />
             </el-tab-pane>
+            <el-tab-pane label="修改个人信息" name="userinfo">
+              <userInfo :user="user" />
+            </el-tab-pane>
+
           </el-tabs>
         </el-card>
       </el-col>
@@ -62,17 +63,18 @@
 import userAvatar from "./userAvatar";
 import userInfo from "./userInfo";
 import resetPwd from "./resetPwd";
-import { getUserProfile } from "@/api/system/user";
+
+import {getAuthzDetailInfo} from "@/api/system/user";
 
 export default {
   name: "Profile",
-  components: { userAvatar, userInfo, resetPwd },
+  components: { userAvatar,  resetPwd, userInfo },
   data() {
     return {
       user: {},
       roleGroup: {},
       postGroup: {},
-      activeTab: "userinfo"
+      activeTab: "resetPwd",
     };
   },
   created() {
@@ -80,11 +82,12 @@ export default {
   },
   methods: {
     getUser() {
-      getUserProfile().then(response => {
-        this.user = response.data;
-        this.roleGroup = response.roleGroup;
-        this.postGroup = response.postGroup;
-      });
+      getAuthzDetailInfo().then(response => {
+          this.user = response.data.subject_details;
+          this.roleGroup = response.data.roles;
+      })
+
+
     }
   }
 };

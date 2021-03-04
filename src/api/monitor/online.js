@@ -1,18 +1,17 @@
 import request from '@/utils/request'
 
 // 查询在线用户列表
-export function list(query) {
+export function list(currentPage,size) {
   return request({
-    url: '/system/online/list',
-    method: 'get',
-    params: query
+    url: 'yeju-all-rest-api/platform/online/list/'+currentPage+'?size='+size,
+    method: 'get'
   })
 }
 
 // 强退用户
-export function forceLogout(tokenId) {
+export function forceLogout(principal) {
   return request({
-    url: '/system/online/' + tokenId,
+    url: 'yeju-all-rest-api/platform/online/' + principal,
     method: 'delete'
   })
 }
