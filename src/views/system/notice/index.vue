@@ -94,7 +94,7 @@
             size="mini"
             type="text"
             icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
+            @click="handlerDeleteOne(scope.row.notice_id)"
             v-hasPermi="['system:notice:remove']"
           >删除</el-button>
         </template>
@@ -131,17 +131,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.status">
-                <el-radio
-                  v-for="dict in statusOptions"
-                  :key="dict.value"
-                  :label="dict.value"
-                >{{dict.label}}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
             <el-form-item label="日期范围">
               <el-date-picker
                 v-model="form.date_range"
@@ -153,6 +142,18 @@
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
               ></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告范围" prop="noticeType">
+              <el-select v-model="form.send_to" placeholder="请选择">
+                <el-option
+                  v-for="dict in messageGroupOptions"
+                  :key="dict.group_id"
+                  :label="dict.group_name"
+                  :value="dict.group_id"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -171,8 +172,11 @@
 </template>
 
 <script>
-import { listNoticeType,listNotice, getNotice, delNotice, addNotice, updateNotice, exportNotice } from "@/api/system/notice";
+import { listNoticeType,listNotice, getNotice, deleteNoticeBatch,delNotice, addNotice, updateNotice, exportNotice } from "@/api/system/notice";
 import Editor from '@/components/Editor';
+import {listUniversalLabelAndValue} from '@/api/system/dict/type'
+
+import {getSystemMessageGroupNameAndId} from '@/api/message/message'
 
 export default {
   name: "Notice",
@@ -203,6 +207,10 @@ export default {
       statusOptions: [],
       // 状态数据字典
       typeOptions: [],
+      //消息组
+      messageGroupOptions : [],
+      // 通知范围数据字典
+      senderTo: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -212,7 +220,9 @@ export default {
         status: undefined
       },
       // 表单参数
-      form: {},
+      form: {
+        receiver_Type: 1
+      },
       // 表单校验
       rules: {
         notice_title: [
@@ -227,8 +237,20 @@ export default {
   created() {
     this.getList();
     this.getNoticeTypeList();
+    this.getSystemMessageGroup();
   },
   methods: {
+
+    /**
+     *  获取系统消息组
+     */
+    getSystemMessageGroup(){
+      getSystemMessageGroupNameAndId().then(resp=>{
+        console.log(resp.data)
+        this.messageGroupOptions = resp.data
+      })
+    },
+
     /** 查询公告列表 */
     getList() {
       this.loading = true;
@@ -244,6 +266,11 @@ export default {
         this.typeOptions = response.data
       })
     },
+    getNoticeStatus(){
+      listUniversalLabelAndValue("notice_status").then(response => {
+          this.statusOptions = response.data
+      })
+    },
     // 取消按钮
     cancel() {
       this.open = false;
@@ -252,11 +279,13 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        noticeId: undefined,
-        noticeTitle: undefined,
-        noticeType: undefined,
-        noticeContent: undefined,
-        status: "0"
+        notice_id: undefined,
+        notice_title: undefined,
+        notice_type: undefined,
+        notice_content: undefined,
+        date_range: undefined,
+        send_to: undefined,
+        content: undefined
       };
       this.resetForm("form");
     },
@@ -272,9 +301,10 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.noticeId)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map(item => item.notice_id)
+      console.log("长度",selection.length)
+
+      this.multiple = !(selection.length>1)
     },
     /** 新增按钮操作 */
     handleAdd() {
@@ -285,21 +315,26 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const noticeId = row.noticeId || this.ids
-      this.open = true;
-      this.title = "修改公告";
+      const noticeId = row.notice_id
 
-      this.form.noticeTitle = row.title
-      this.form.noticeType  = row.notice_type
-      this.form.noticeContent = row.content
-      this.form.status = row.status
+      this.title = "修改公告";
+      getNotice(noticeId).then(resp => {
+        let data = resp.data;
+        this.form.notice_title = data.title
+        this.form.date_range = data.date_range
+        this.form.content = data.content
+        this.form.notice_type = data.notice_type
+        this.form.send_to = data.send_to
+        this.form.notice_id = data.notice_id;
+        this.open = true;
+      })
 
     },
     /** 提交按钮 */
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.noticeId !== undefined) {
+          if (this.form.notice_id !== undefined) {
             updateNotice(this.form).then(response => {
               if(response.success){
               this.msgSuccess("修改成功");
@@ -320,18 +355,34 @@ export default {
       });
     },
     /** 删除按钮操作 */
-    handleDelete(row) {
-      const noticeIds = row.noticeId || this.ids
+    handleDelete() {
+
+      const noticeIds = this.ids
       this.$confirm('是否确认删除公告编号为"' + noticeIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
         }).then(function() {
-          return delNotice(noticeIds);
+          return deleteNoticeBatch(noticeIds)
+
         }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");
         })
+    },
+
+    handlerDeleteOne(id){
+      this.$confirm('是否确认删除公告编号为"' + id + '"的数据项?', "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(function() {
+         return delNotice(id);
+
+      }).then(() => {
+        this.getList();
+        this.msgSuccess("删除成功");
+      })
     }
   }
 };

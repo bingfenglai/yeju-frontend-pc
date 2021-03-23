@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询操作日志列表
-export function list(query) {
+export function list(currentPage,size) {
   return request({
-    url: '/system/operlog/list',
+    url:  'yeju-all-rest-api/log/operationLog/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 

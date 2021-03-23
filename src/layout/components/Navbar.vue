@@ -54,8 +54,8 @@ import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
-
-
+import {getToken} from '@/utils/auth'
+import {realTimeNotice} from '@/api/system/notice'
 
 export default {
   components: {
@@ -86,7 +86,16 @@ export default {
     }
   },
 
+  created() {
+    this.getNotices()
+  },
+
   methods: {
+
+    getNotices() {
+      realTimeNotice(getToken())
+    },
+
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },

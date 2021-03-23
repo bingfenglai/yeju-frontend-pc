@@ -47,9 +47,9 @@
         >
           <el-option
             v-for="dict in statusOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -105,18 +105,16 @@
 
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="日志编号" align="center" prop="operId" />
+      <el-table-column label="日志编号" align="center" prop="operation_log_id" />
       <el-table-column label="系统模块" align="center" prop="title" />
-      <el-table-column label="操作类型" align="center" prop="businessType" :formatter="typeFormat" />
-      <el-table-column label="请求方式" align="center" prop="requestMethod" />
+      <el-table-column label="操作类型" align="center" prop="business_type" :formatter="typeFormat" />
+      <el-table-column label="请求方式" align="center" prop="request_method" />
       <el-table-column label="操作人员" align="center" prop="operName" />
-      <el-table-column label="主机" align="center" prop="operIp" width="130" :show-overflow-tooltip="true" />
-      <el-table-column label="操作状态" align="center" prop="status" :formatter="statusFormat" />
-      <el-table-column label="操作日期" align="center" prop="operTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.operTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="主机" align="center" prop="ip" width="130" :show-overflow-tooltip="true" />
+      <el-table-column label="操作状态" align="center" prop="operation_status" :formatter="statusFormat"
+                       :class="[operation_status=== '0' ? 'orange': '', operation_status==='1'? 'blue': '',]"/>
+      <el-table-column label="操作日期" align="center" prop="operation_time" width="180"/>
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -227,7 +225,7 @@ export default {
     this.getDicts("sys_oper_type").then(response => {
       this.typeOptions = response.data;
     });
-    this.getDicts("sys_common_status").then(response => {
+    this.getDicts("operation_status").then(response => {
       this.statusOptions = response.data;
     });
   },
@@ -235,8 +233,8 @@ export default {
     /** 查询登录日志 */
     getList() {
       this.loading = true;
-      list(this.addDateRange(this.queryParams, this.dateRange)).then( response => {
-          this.list = response.rows;
+      list(this.queryParams.pageNum, this.queryParams.pageSize).then( response => {
+          this.list = response.list;
           this.total = response.total;
           this.loading = false;
         }
@@ -244,11 +242,11 @@ export default {
     },
     // 操作日志状态字典翻译
     statusFormat(row, column) {
-      return this.selectDictLabel(this.statusOptions, row.status);
+      return this.selectDictLabel(this.statusOptions, row.operation_status);
     },
     // 操作日志类型字典翻译
     typeFormat(row, column) {
-      return this.selectDictLabel(this.typeOptions, row.businessType);
+      return this.selectDictLabel(this.typeOptions, row.business_type);
     },
     /** 搜索按钮操作 */
     handleQuery() {

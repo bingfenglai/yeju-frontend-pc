@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询调度日志列表
-export function listJobLog(query) {
+export function listJobLog(currentPage,size) {
   return request({
-    url: '/schedule/job/log/list',
+    url:  'yeju-all-rest-api/log/jobLog/list/'+currentPage+'?size='+size,
     method: 'get',
-    params: query
   })
 }
 

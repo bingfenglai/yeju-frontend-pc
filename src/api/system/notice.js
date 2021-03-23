@@ -5,7 +5,7 @@ import { Notification } from 'element-ui'
 // 查询公告列表
 export function listNotice(currentPage,size) {
   return request({
-    url: '/yeju-all-rest-api/notice/list/'+currentPage+"?size="+size,
+    url: '/yeju-all-rest-api/message/notice/list/'+currentPage+"?size="+size,
     method: 'get'
   })
 }
@@ -13,7 +13,7 @@ export function listNotice(currentPage,size) {
 // 查询公告类型列表
 export function listNoticeType(){
   return request({
-    url: '/yeju-all-rest-api/notice/type/list',
+    url: '/yeju-all-rest-api/message/notice/type/list',
     method: 'get'
   })
 }
@@ -21,7 +21,7 @@ export function listNoticeType(){
 // 查询公告详细
 export function getNotice(noticeId) {
   return request({
-    url: '/system/notice/' + noticeId,
+    url: '/yeju-all-rest-api/message/notice/' + noticeId,
     method: 'get'
   })
 }
@@ -29,7 +29,7 @@ export function getNotice(noticeId) {
 // 新增公告
 export function addNotice(args) {
   return request({
-    url: '/yeju-all-rest-api/notice/create',
+    url: '/yeju-all-rest-api/message/notice',
     method: 'post',
     data: args
   })
@@ -38,7 +38,7 @@ export function addNotice(args) {
 // 修改公告
 export function updateNotice(data) {
   return request({
-    url: '/system/notice',
+    url: '/yeju-all-rest-api/message/notice',
     method: 'put',
     data: data
   })
@@ -46,18 +46,31 @@ export function updateNotice(data) {
 
 // 删除公告
 export function delNotice(noticeId) {
+  console.log("删除一个")
   return request({
-    url: '/system/notice/' + noticeId,
+    url: '/yeju-all-rest-api/message/notice/'+noticeId,
     method: 'delete'
+  })
+}
+
+export function deleteNoticeBatch(Ids){
+  console.log("删除多个")
+  return request({
+    url: '/yeju-all-rest-api/message/notice/deleteBatch',
+    method: 'delete',
+    data: Ids,
   })
 }
 
 // websocket 实时接收公告
 export function realTimeNotice(token){
   console.log("进行websocket连接》。。。")
-  const wsUrl = webSocketBaseUrl.state.ws+'/yeju-notice/ws/notice'
+  const wsUrl = webSocketBaseUrl.state.ws+'/yeju-message/ws/notice'
   console.log(wsUrl)
   const that = this;
+
+
+
   //let token = store.state.token.Authorization
   if (typeof (WebSocket) == 'undefined') {
     Notification.warning({
@@ -80,12 +93,14 @@ export function realTimeNotice(token){
         let data = JSON.parse(msg.data)
         Notification({
           title: data.title,
+
           message : data.message,
           duration: 0,
           dangerouslyUseHTMLString: true,
           type: data.type||'info',
           position: 'bottom-right',
           //showClose: false
+         //onClose: confirmRead(data.messageId)
         })
       };
       // 监听socket错误
@@ -103,4 +118,13 @@ export function realTimeNotice(token){
       }
     //})
   }
+}
+
+
+function confirmRead(messageIdStr) {
+
+  request({
+    url: '/yeju-message/notice/confirmRead/'+messageIdStr,
+    method: 'post',
+  })
 }

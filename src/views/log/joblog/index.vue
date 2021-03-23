@@ -37,9 +37,9 @@
         >
           <el-option
             v-for="dict in statusOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -95,17 +95,14 @@
 
     <el-table v-loading="loading" :data="jobLogList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="日志编号" width="80" align="center" prop="jobLogId" />
-      <el-table-column label="任务名称" align="center" prop="jobName" :show-overflow-tooltip="true" />
-      <el-table-column label="任务组名" align="center" prop="jobGroup" :formatter="jobGroupFormat" :show-overflow-tooltip="true" />
-      <el-table-column label="调用目标字符串" align="center" prop="invokeTarget" :show-overflow-tooltip="true" />
+      <el-table-column label="日志编号" width="80" align="center" prop="id" />
+      <el-table-column label="任务名称" align="center" prop="task_name" :show-overflow-tooltip="true" />
+      <el-table-column label="任务组名" align="center" prop="task_group" :show-overflow-tooltip="true" />
+      <el-table-column label="调用目标字符串" align="center" prop="invoke_target" :show-overflow-tooltip="true" />
       <el-table-column label="日志信息" align="center" prop="jobMessage" :show-overflow-tooltip="true" />
-      <el-table-column label="执行状态" align="center" prop="status" :formatter="statusFormat" />
-      <el-table-column label="执行时间" align="center" prop="createTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="执行状态" align="center" prop="task_status" :formatter="statusFormat" />
+      <el-table-column label="执行时间" align="center" prop="start_time" width="180"/>
+
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -132,27 +129,27 @@
       <el-form ref="form" :model="form" label-width="100px" size="mini">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="日志序号：">{{ form.jobLogId }}</el-form-item>
-            <el-form-item label="任务名称：">{{ form.jobName }}</el-form-item>
+            <el-form-item label="日志序号：">{{ form.id }}</el-form-item>
+            <el-form-item label="任务名称：">{{ form.task_name }}</el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="任务分组：">{{ form.jobGroup }}</el-form-item>
-            <el-form-item label="执行时间：">{{ form.createTime }}</el-form-item>
+            <el-form-item label="任务分组：">{{ form.task_group }}</el-form-item>
+            <el-form-item label="执行时间：">{{ form.start_time }}</el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="调用方法：">{{ form.invokeTarget }}</el-form-item>
+            <el-form-item label="调用目标：">{{ form.invoke_target }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="日志信息：">{{ form.jobMessage }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="执行状态：">
-              <div v-if="form.status == 0">正常</div>
-              <div v-else-if="form.status == 1">失败</div>
+              <div v-if="form.task_status == 1" style="color: #00afff">成功</div>
+              <div v-else-if="form.task_status == 0" style="color: #C03639">失败</div>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="异常信息：" v-if="form.status == 1">{{ form.exceptionInfo }}</el-form-item>
+            <el-form-item label="异常信息：" v-if="form.status == 0">{{ form.exceptionInfo }}</el-form-item>
           </el-col>
         </el-row>
       </el-form>
@@ -204,19 +201,19 @@ export default {
   },
   created() {
     this.getList();
-    this.getDicts("sys_job_status").then(response => {
+    this.getDicts("task_status").then(response => {
       this.statusOptions = response.data;
     });
-    this.getDicts("sys_job_group").then(response => {
-      this.jobGroupOptions = response.data;
-    });
+    // this.getDicts("sys_job_group").then(response => {
+    //   this.jobGroupOptions = response.data;
+    // });
   },
   methods: {
     /** 查询调度日志列表 */
     getList() {
       this.loading = true;
-      listJobLog(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-          this.jobLogList = response.rows;
+      listJobLog(this.queryParams.pageNum, this.queryParams.pageSize).then(response => {
+          this.jobLogList = response.list;
           this.total = response.total;
           this.loading = false;
         }
@@ -224,7 +221,7 @@ export default {
     },
     // 执行状态字典翻译
     statusFormat(row, column) {
-      return this.selectDictLabel(this.statusOptions, row.status);
+      return this.selectDictLabel(this.statusOptions, row.task_status);
     },
     // 任务组名字典翻译
     jobGroupFormat(row, column) {

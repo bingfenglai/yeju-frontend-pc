@@ -191,6 +191,13 @@ export const constantRoutes = [
         name: 'house',
         hidden : false,
         meta : {title : 'API文档'}
+      },
+      {
+        path: '/house/details/:house_id/:houseStatus(\\d+)',
+        component : (resolve) => require(['@/views/product/house/details'],resolve),
+        name: 'house_details',
+        hidden: false,
+        meta: {title: '房源详情'}
       }
 
 

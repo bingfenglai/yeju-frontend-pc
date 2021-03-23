@@ -49,7 +49,7 @@ const user = {
           commit('SET_EXPIRES_IN', data.expiresAt)
 
           //读取系统通知
-          realTimeNotice(data.accessToken);
+          //realTimeNotice(data.accessToken);
           resolve()
         }).catch(error => {
           reject(error)
