@@ -34,7 +34,7 @@
               style="width: 240px"
             >
               <el-option
-                v-for="dict in customerStatusOptions"
+                v-for="dict in statusOptions"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -78,10 +78,9 @@
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column label="客户标识" align="center" prop="customer_id" />
           <el-table-column label="客户姓名" align="center" prop="customer_name" :show-overflow-tooltip="true" />
-          <el-table-column label="性别" align="center" prop="gender" :formatter="statusFormat" />
+          <el-table-column label="性别" align="center" prop="gender" :show-overflow-tooltip="true" />
           <el-table-column label="手机号码" align="center" prop="phone_number" width="120" />
           <el-table-column label="邮箱" align="center" prop="email" :show-overflow-tooltip="true" />
-          <el-table-column label="城市"
           <el-table-column label="创建时间" align="center" prop="create_time" width="160"></el-table-column>
           <el-table-column
             label="操作"
@@ -126,6 +125,259 @@
       </el-col>
     </el-row>
 
+    <!-- 添加或修改参数配置对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="用户昵称" prop="nickName">
+              <el-input v-model="form.nickName" placeholder="请输入用户昵称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="归属部门" prop="deptId">
+              <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" placeholder="请选择归属部门" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="手机号码" prop="phonenumber">
+              <el-input v-model="form.phonenumber" placeholder="请输入手机号码" maxlength="11" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item v-if="form.userId == undefined" label="用户名称" prop="userName">
+              <el-input v-model="form.userName" placeholder="请输入用户名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item v-if="form.userId == undefined" label="用户密码" prop="password">
+              <el-input v-model="form.password" placeholder="请输入用户密码" type="password" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="用户性别">
+              <el-select v-model="form.sex" placeholder="请选择">
+                <el-option
+                  v-for="dict in genderOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictLabel"
+                  :value="dict.dictValue"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio
+                  v-for="dict in statusOptions"
+                  :key="dict.dictValue"
+                  :label="dict.dictValue"
+                >{{dict.dictLabel}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="岗位">
+              <el-select v-model="form.postIds" multiple placeholder="请选择">
+                <el-option
+                  v-for="item in postOptions"
+                  :key="item.postId"
+                  :label="item.postName"
+                  :value="item.postId"
+                  :disabled="item.status == 1"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="角色">
+              <el-select v-model="form.roleIds" multiple placeholder="请选择">
+                <el-option
+                  v-for="item in roleOptions"
+                  :key="item.roleId"
+                  :label="item.roleName"
+                  :value="item.roleId"
+                  :disabled="item.status == 1"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注">
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+
+
+    <!-- 用户导入对话框 -->
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url + '?updateSupport=' + upload.updateSupport"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将文件拖到此处，或
+          <em>点击上传</em>
+        </div>
+        <div class="el-upload__tip" slot="tip">
+          <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的用户数据
+          <el-link type="info" style="font-size:12px" @click="importTemplate">下载模板</el-link>
+        </div>
+        <div class="el-upload__tip" style="color:red" slot="tip">提示：仅允许导入“xls”或“xlsx”格式文件！</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+
+    <!--    添加或修改抽屉-->
+    <el-drawer
+      :title="title"
+      :visible.sync="drawer"
+      :before-close="handleClose"
+
+      >
+      <div class="demo-drawer__content" >
+
+        <el-form ref="form" :label-position="labelPosition" :model="form" :rules="rules" label-width="80px">
+          <el-row >
+            <el-col :span="18" :offset="2">
+              <el-form-item v-if="form.employees_number === undefined" label="姓名" prop="username">
+                <el-input v-model="form.username" placeholder="请输入用户姓名" />
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="归属部门" prop="deptId">
+                <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" placeholder="请选择归属部门" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="手机号码" prop="phone_number">
+                <el-input v-model="form.phone_number" placeholder="请输入手机号码" maxlength="11" />
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="邮箱" prop="email">
+                <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item v-if="form.employees_number=== undefined" label="用户密码" prop="password">
+                <el-input v-model="form.password" placeholder="请输入用户密码" type="password" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="用户性别">
+                <el-select v-model="form.gender" placeholder="请选择">
+                  <el-option
+                    v-for="dict in genderOptions"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                  <el-radio
+                    v-for="dict in statusOptions"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{dict.label}}</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="角色">
+                <el-select v-model="form.roleIds" multiple placeholder="请选择">
+                  <el-option
+                    v-for="item in roleOptions"
+                    :key="item.roleId"
+                    :label="item.roleName"
+                    :value="item.roleId"
+                    :disabled="item.status === 1"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="18" :offset="2">
+              <el-form-item label="备注">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <div slot="footer" class=" drawer__footer" style="margin-left: 50%">
+
+              <el-button @click="cancel" class="f_btn f_btn_c">取 消</el-button>
+
+
+              <el-button type="primary" @click="submitForm" class="f_btn">确 定</el-button>
+
+        </div>
+
+      </div>
+
+
+
+    </el-drawer>
   </div>
 </template>
 
@@ -146,7 +398,6 @@ import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 const { listUniversalLabelAndValue } = require('@/api/system/dict/type')
-
 
 export default {
   name: "User",
@@ -184,7 +435,7 @@ export default {
       // 日期范围
       dateRange: [],
       // 状态数据字典
-      customerStatusOptions: [],
+      statusOptions: [],
       // 性别状态字典
       genderOptions: [],
       // 岗位选项
@@ -262,14 +513,13 @@ export default {
   },
   created() {
     this.getList();
-    this.getUserGenderOption();
+    this.getTreeSelect();
     this.getUserStatusList();
-
+    // this.getConfigKey("sys.user.initPassword").then(response => {
+    //   this.initPassword = response.msg;
+    // });
   },
   methods: {
-    statusFormat(row, column) {
-      return this.selectDictLabel(this.genderOptions, row.gender);
-    },
     getUserGenderOption(){
       listUniversalLabelAndValue("gender").then(resp=>{
         console.log(resp.data)
@@ -288,8 +538,8 @@ export default {
       );
     },
     getUserStatusList(){
-      listUniversalLabelAndValue("customer_status").then(resp => {
-          this.customerStatusOptions = resp.data;
+      ListUserStatus().then(response => {
+          this.statusOptions = response.data
       })
     },
     /** 查询部门下拉树结构 */

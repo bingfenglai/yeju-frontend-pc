@@ -6,3 +6,10 @@ export function getCustomerList(currentPage,size){
     method: 'GET'
   })
 }
+
+export function listCustomerStatus(){
+  return request({
+    url: '',
+    method: 'GET'
+  })
+}

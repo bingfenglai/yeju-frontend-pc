@@ -45,9 +45,9 @@ service.interceptors.response.use(res => {
           type: 'warning'
         }
       ).then(() => {
-        store.dispatch('LogOut').then(() => {
+        // store.dispatch('LogOut').then(() => {
           location.reload() // 为了重新实例化vue-router对象 避免bug
-        })
+        // })
       })
     } else if (code !== "00000" && code!=="A0001") {
       Notification.error({
