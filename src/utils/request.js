@@ -111,4 +111,25 @@ export function download(url, params, filename) {
   })
 }
 
+// 通用上传方法
+const uploadApi = 'yeju-all-rest-api/oos/upload';
+
+export function upload(fileName){
+  let formData = new FormData();
+  let configs = {
+    headers : {
+        'Content-Type': 'multipart/form-data'
+
+    }
+
+  };
+  formData.append('fileName',fileName.target.files[0]);
+
+  return service.post(
+    uploadApi,
+    formData,
+    configs
+  )
+}
+
 export default service

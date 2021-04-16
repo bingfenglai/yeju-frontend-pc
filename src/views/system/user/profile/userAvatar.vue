@@ -56,6 +56,7 @@
 import store from "@/store";
 import { VueCropper } from "vue-cropper";
 import { uploadAvatar } from "@/api/system/user";
+import {upload,getFileMd5,checkMd5} from '@/api/oos'
 
 export default {
   components: { VueCropper },
@@ -122,16 +123,31 @@ export default {
     // 上传图片
     uploadImg() {
       this.$refs.cropper.getCropBlob(data => {
-        let formData = new FormData();
-        formData.append("avatarfile", data);
-        uploadAvatar(formData).then(response => {
-          this.open = false;
-          this.options.img = process.env.VUE_APP_BASE_API + response.imgUrl;
-          store.commit('SET_AVATAR', this.options.img);
-          this.msgSuccess("修改成功");
-          this.visible = false;
+        // let formData = new FormData();
+        // formData.append("filePart", data);
+        // uploadAvatar(formData).then(response => {
+        getFileMd5(data,md5=>{
+          checkMd5(md5).then(response => {
+              if (response.data.length>0){
+                this.options.img = response.data;
+              }else {
+                upload(data).then(response => {
+                  this.options.img = response.data
+                })
+              }
+            //this.options.img = Response
+            console.log(fastUpload(data))
+            this.open = false;
+
+            store.commit('SET_AVATAR', this.options.img);
+            this.msgSuccess("修改成功");
+            this.visible = false;
+
+          })
+        })
+
         });
-      });
+
     },
     // 实时预览
     realTime(data) {

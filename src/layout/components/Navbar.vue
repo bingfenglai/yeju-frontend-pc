@@ -93,6 +93,7 @@ export default {
   methods: {
 
     getNotices() {
+      console.log('获取公告！！！！！');
       realTimeNotice(getToken())
     },
 

@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import { praseStrEmpty } from "@/utils/ruoyi";
+import {upload} from '@/utils/request'
 
 // 查询用户列表
 export function listUser(currentPage,size) {
@@ -116,8 +117,11 @@ export function updateUserPwd(oldPassword, newPassword) {
 // 用户头像上传
 export function uploadAvatar(data) {
   return request({
-    url: '/system/user/profile/avatar',
-    method: 'post',
+    url: 'yeju-all-rest-api/oos/upload',
+    method: 'POST',
+    headers : {
+      'Content-Type': 'multipart/form-data'
+    },
     data: data
   })
 }

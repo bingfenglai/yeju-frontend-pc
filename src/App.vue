@@ -28,7 +28,8 @@ function refreshTokenCounterReset(){
 }
 
 //
-window.addEventListener("click", refreshTokenCounterReset)
+window.addEventListener(
+  "click", refreshTokenCounterReset)
 
 
 </script>
