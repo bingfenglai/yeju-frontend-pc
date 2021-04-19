@@ -25,23 +25,8 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select
-              v-model="queryParams.status"
-              placeholder="用户状态"
-              clearable
-              size="small"
-              style="width: 240px"
-            >
-              <el-option
-                v-for="dict in customerStatusOptions"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="创建时间">
+
+          <el-form-item label="注册时间">
             <el-date-picker
               v-model="dateRange"
               size="small"
@@ -81,7 +66,7 @@
           <el-table-column label="性别" align="center" prop="gender" :formatter="statusFormat" />
           <el-table-column label="手机号码" align="center" prop="phone_number" width="120" />
           <el-table-column label="邮箱" align="center" prop="email" :show-overflow-tooltip="true" />
-          <el-table-column label="城市"
+          <el-table-column label="城市" align="center" prop="city"></el-table-column>
           <el-table-column label="创建时间" align="center" prop="create_time" width="160"></el-table-column>
           <el-table-column
             label="操作"
@@ -94,24 +79,11 @@
                 size="mini"
                 type="text"
                 icon="el-icon-edit"
-                @click="handleUpdate(scope.row)"
-                v-hasPermi="['system:user:edit']"
-              >修改</el-button>
-              <el-button
-                v-if="scope.row.userId !== 1"
-                size="mini"
-                type="text"
-                icon="el-icon-delete"
-                @click="handleDelete(scope.row)"
-                v-hasPermi="['system:user:remove']"
-              >删除</el-button>
-              <el-button
-                size="mini"
-                type="text"
-                icon="el-icon-key"
-                @click="handleResetPwd(scope.row)"
-                v-hasPermi="['system:user:resetPwd']"
-              >重置</el-button>
+                @click="handleDetails(scope.row)"
+                v-hasPermi="['customer:details']"
+              >详情</el-button>
+
+
             </template>
           </el-table-column>
         </el-table>
@@ -149,8 +121,8 @@ const { listUniversalLabelAndValue } = require('@/api/system/dict/type')
 
 
 export default {
-  name: "User",
-  components: { Treeselect },
+  name: "customer",
+
   data() {
     return {
       // 抽屉是否显示
@@ -183,8 +155,7 @@ export default {
       initPassword: undefined,
       // 日期范围
       dateRange: [],
-      // 状态数据字典
-      customerStatusOptions: [],
+
       // 性别状态字典
       genderOptions: [],
       // 岗位选项
@@ -197,21 +168,7 @@ export default {
         children: "children",
         label: "label"
       },
-      // 用户导入参数
-      upload: {
-        // 是否显示弹出层（用户导入）
-        open: false,
-        // 弹出层标题（用户导入）
-        title: "",
-        // 是否禁用上传
-        isUploading: false,
-        // 是否更新已经存在的用户数据
-        updateSupport: 0,
-        // 设置上传的请求头部
-        headers: { Authorization: "Bearer " + getToken() },
-        // 上传的地址
-        url: process.env.VUE_APP_BASE_API + "/system/user/importData"
-      },
+
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -221,49 +178,16 @@ export default {
         status: undefined,
         deptId: undefined
       },
-      // 表单校验
-      rules: {
-        userName: [
-          { required: true, message: "用户名称不能为空", trigger: "blur" }
-        ],
-        nickName: [
-          { required: true, message: "用户昵称不能为空", trigger: "blur" }
-        ],
-        deptId: [
-          { required: true, message: "归属部门不能为空", trigger: "blur" }
-        ],
-        password: [
-          { required: true, message: "用户密码不能为空", trigger: "blur" }
-        ],
-        email: [
-          { required: true, message: "邮箱地址不能为空", trigger: "blur" },
-          {
-            type: "email",
-            message: "'请输入正确的邮箱地址",
-            trigger: ["blur", "change"]
-          }
-        ],
-        phone_number: [
-          { required: true, message: "手机号码不能为空", trigger: "blur" },
-          {
-            pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
-            message: "请输入正确的手机号码",
-            trigger: "blur"
-          }
-        ]
-      }
+
     };
   },
   watch: {
-    // 根据名称筛选部门树
-    deptName(val) {
-      this.$refs.tree.filter(val);
-    }
+
   },
   created() {
     this.getList();
     this.getUserGenderOption();
-    this.getUserStatusList();
+
 
   },
   methods: {
@@ -287,44 +211,9 @@ export default {
         }
       );
     },
-    getUserStatusList(){
-      listUniversalLabelAndValue("customer_status").then(resp => {
-          this.customerStatusOptions = resp.data;
-      })
-    },
-    /** 查询部门下拉树结构 */
-    getTreeSelect() {
-      treeselect().then(response => {
-        console.log(response.data)
-        this.deptOptions = response.data;
-      });
-    },
-    // 筛选节点
-    filterNode(value, data) {
-      if (!value) return true;
-      return data.name.indexOf(value) !== -1;
-    },
-    // 节点单击事件
-    handleNodeClick(data) {
-      this.queryParams.deptId = data.id;
-      this.getList();
-    },
-    // 用户状态修改
-    handleStatusChange(row) {
-      console.log("状态：：：：：",row.employees_status)
-      let text = row.employees_status === 1 ? "启用" : "停用";
-      this.$confirm('确认要"' + text + '""' + row.name + '"用户吗?', "警告", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then(function() {
-          return changeUserStatus(row.employees_number, row.employees_status);
-        }).then(() => {
-          this.msgSuccess(text + "成功");
-        }).catch(function() {
-          row.employees_status = row.employees_status === 1 ? "1" : "0";
-        });
-    },
+
+
+
     // 取消按钮
     cancel() {
       this.drawer = false;

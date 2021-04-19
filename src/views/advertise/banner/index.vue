@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
+
 
       <!--用户数据-->
-      <el-col :span="20" :xs="24">
+
         <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
           <el-form-item label="标题" prop="userName">
             <el-input
@@ -73,8 +73,11 @@
           <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
 
+
+
+
         <el-table v-loading="loading" :data="bannerList" @selection-change="handleSelectionChange">
-          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column type="selection" align="center" />
           <el-table-column label="标识" align="center" prop="id" />
           <el-table-column label="图片" align="center">
             <template slot-scope="scope">
@@ -93,11 +96,11 @@
               </template>
 
           </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="create_time" width="160"></el-table-column>
+          <el-table-column label="创建时间" align="center" prop="create_time" ></el-table-column>
           <el-table-column
             label="操作"
             align="center"
-            width="160"
+
             class-name="small-padding fixed-width"
           >
             <template slot-scope="scope">
@@ -128,7 +131,7 @@
           :limit.sync="queryParams.pageSize"
           @pagination="getList"
         />
-      </el-col>
+
 
 
 
@@ -195,7 +198,7 @@
 
 
       </el-drawer>
-    </el-row>
+
 
   </div>
 </template>
