@@ -47,4 +47,18 @@ export function getDirectChildNodeById(id){
   })
 }
 
+export function getDistrictOptionListByParentId(id){
+  return request({
+    url: baseUrl+'/option/parent/'+id,
+    method: 'GET',
+  })
+}
+
+export function getDistrictOptionListById(id){
+  return request({
+    url: baseUrl+'/option/'+id,
+    method: 'GET',
+  })
+}
+
 

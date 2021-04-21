@@ -6,7 +6,7 @@
 
           <el-form-item label="出租方式" prop="rental_mode">
             <el-select
-              v-model="queryParams.rental_mode"
+              v-model="queryParams.rentalMode"
               placeholder="请选择下拉选择"  clearable
                        :style="{width: '100%'}">
               <el-option
@@ -20,14 +20,14 @@
 <!--        </el-col>-->
 <!--        <el-col :span="8">-->
           <el-form-item label="创建时间" prop="date_range">
-            <el-date-picker type="daterange" v-model="queryParams.date_range" format="yyyy-MM-dd"
+            <el-date-picker type="daterange" v-model="queryParams.dateRange" format="yyyy-MM-dd"
                             value-format="yyyy-MM-dd" :style="{width: '100%'}" start-placeholder="开始日期"
                             end-placeholder="结束日期" range-separator="-" clearable></el-date-picker>
           </el-form-item>
 <!--        </el-col>-->
 <!--        <el-col :span="8">-->
           <el-form-item label="房源状态" prop="house_status">
-            <el-select v-model="queryParams.house_status" placeholder="请选择房源状态" clearable
+            <el-select v-model="queryParams.houseStatus" placeholder="请选择房源状态" clearable
                        :style="{width: '100%'}">
               <el-option
                 v-for="dict in house_status"
@@ -73,27 +73,34 @@
       fixed
       prop="house_id"
       label="房源编号"
-      width="150"
+
       align="center">
     </el-table-column>
     <el-table-column
       prop="title"
       label="标题"
       :show-overflow-tooltip="true"
-      width="120"
+
       align="center">
     </el-table-column>
     <el-table-column
       prop="rent"
-      label="租金（元/月）"
-      width="120"
+      label="租金"
+
+      align="center">
+    </el-table-column>
+
+    <el-table-column
+      prop="rent_unit"
+      label="租金缴纳单位"
+      :formatter="rentUnitFormat"
       align="center">
     </el-table-column>
 
     <el-table-column
       prop="rental_mode"
       label="出租方式"
-      width="120"
+
       :formatter="rentalModeFormat"
       align="center">
     </el-table-column>
@@ -101,7 +108,7 @@
     <el-table-column
       prop="payment_method"
       label="支付方式"
-      width="120"
+
       :formatter="paymentMethodFormat"
       align="center">
     </el-table-column>
@@ -109,7 +116,7 @@
     <el-table-column
       prop="house_status"
       label="状态"
-      width="120"
+
       :formatter="statusFormat"
       align="center">
     </el-table-column>
@@ -117,14 +124,14 @@
     <el-table-column
       prop="create_time"
       label="创建时间"
-      width="300"
+
       align="center">
     </el-table-column>
 
     <el-table-column
 
       label="操作"
-      width="150"
+
        align="center">
       <template slot-scope="scope">
 
@@ -165,7 +172,7 @@
 
 
 <script>
-import { findDetailsByIdAndStatus, findPage } from '@/api/product/house/house'
+import { findDetailsByIdAndStatus, findPage,queryHouseList } from '@/api/product/house/house'
 export default {
   name: 'index',
   data() {
@@ -182,9 +189,9 @@ export default {
       queryParams:{
         currentPage: 1,
         size: 10,
-        rental_mode: [],
-        date_range: null,
-        house_status: undefined,
+        rentalMode: undefined,
+        dateRange: null,
+        houseStatus: undefined,
       },
       // 遮罩层
       loading: true,
@@ -192,6 +199,7 @@ export default {
       house_status: [],
 
       rental_mode_options: [],
+      rentUntilOptions:[],
 
       payment_method: [],
 
@@ -219,12 +227,15 @@ export default {
     this.getDicts("payment_method").then(resp => {
       this.payment_method =resp.data
     })
+    this.getDicts("rent_unit").then(resp => {
+      this.rentUntilOptions = resp.data
+    })
   },
   methods: {
 
     getHouseList(){
 
-      findPage(this.queryParams.currentPage,this.queryParams.size).then(resp=>{
+      queryHouseList(this.queryParams).then(resp=>{
         this.houseList = resp.list
         this.total = resp.total
         this.loading  = false
@@ -257,6 +268,10 @@ export default {
       return this.selectDictLabel(this.house_status, row.house_status);
     },
 
+    rentUnitFormat(row,column){
+      return this.selectDictLabel(this.rentUntilOptions, row.rent_unit);
+    },
+
     rentalModeFormat(row, column){
       return this.selectDictLabel(this.rental_mode_options,row.rental_mode)
     },
@@ -265,7 +280,8 @@ export default {
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
+      this.queryParams.size = 10;
+      this.queryParams.currentPage = 1;
       this.getHouseList();
     },
     /** 重置按钮操作 */

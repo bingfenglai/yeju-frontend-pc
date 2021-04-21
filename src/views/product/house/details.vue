@@ -4,15 +4,7 @@
 
     <div >
 
-      <el-row>
-        <el-carousel :interval="4000" type="card">
-          <el-carousel-item v-for="item in this.houseDetails.house_resource_info_bean_list" :key="item">
-            <el-image
-              :src="item.file_url"
-              :fit="fit"></el-image>
-          </el-carousel-item>
-        </el-carousel>
-      </el-row>
+
 
       <el-row>
         <el-form
@@ -217,7 +209,7 @@
           </el-row>
 
           <el-row>
-            <el-divider><span style="font-weight: bolder">大图</span></el-divider>
+            <el-divider><span style="font-weight: bolder">审核材料</span></el-divider>
           </el-row>
 
           <el-row>

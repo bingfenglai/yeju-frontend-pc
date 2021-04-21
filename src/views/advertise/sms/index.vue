@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-  
+
         <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
           <el-form-item label="内容" prop="type">
             <el-input
@@ -299,7 +299,7 @@ export default {
     getList() {
       this.loading = true;
       query(this.queryParams).then(response => {
-          console.log("轮播图数据",response.list)
+
           this.smsList = response.list;
           this.total = response.total;
           this.loading = false;
@@ -349,7 +349,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.employees_number);
+      this.ids = selection.map(item => item.id);
       this.single = selection.length !== 1;
       this.multiple = !selection.length;
     },
