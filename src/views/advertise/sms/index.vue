@@ -126,8 +126,8 @@
         <pagination
           v-show="total>0"
           :total="total"
-          :page.sync="queryParams.pageNum"
-          :limit.sync="queryParams.pageSize"
+          :page.sync="queryParams.currentPage"
+          :limit.sync="queryParams.size"
           @pagination="getList"
         />
 
