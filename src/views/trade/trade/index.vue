@@ -57,11 +57,15 @@
 
     <el-table v-loading="loading" :data="smsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column label="标识" align="center" prop="id" />
+      <el-table-column label="交易标识" align="center" prop="trade_id" />
 
-      <el-table-column label="类型" align="center" prop="type" :formatter="typesFormat" />
-      <el-table-column label="状态" align="center" prop="status" :formatter="statusFormat" />
-      <el-table-column label="内容" align = "center"  prop="template" :show-overflow-tooltip="true" />
+      <el-table-column label="房源编号" align="center" prop="house_id" :show-overflow-tooltip="true" />
+      <el-table-column label="房东标识" align="center" prop="landlord_id" :show-overflow-tooltip="true" />
+      <el-table-column label="房客标识" align = "center"  prop="tenant_id" :show-overflow-tooltip="true" />
+      <el-table-column label="支付金额" align = "center"  prop="free" :show-overflow-tooltip="true" />
+      <el-table-column label="房租单价" align = "center"  prop="house_rent_unit_free" :show-overflow-tooltip="true" />
+      <el-table-column label="租金单位" align = "center"  prop="rent_unit" :show-overflow-tooltip="true" />
+      <el-table-column label="交易状态" align="center" prop="trading_status" :show-overflow-tooltip="true"/>
       <el-table-column label="创建时间" align="center" prop="create_time" width="160"></el-table-column>
       <el-table-column label="备注" align = "center"  prop="remark" />
       <el-table-column
